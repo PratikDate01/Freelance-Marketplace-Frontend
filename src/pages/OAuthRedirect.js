@@ -23,7 +23,7 @@ const OAuthRedirect = () => {
 
         // Redirect based on role
         if (user.role === "freelancer") {
-          navigate("/freelancer/profile");
+          navigate("/freelancer/dashboard");
         } else {
           navigate("/client/profile");
         }

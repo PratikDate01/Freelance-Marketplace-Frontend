@@ -1,102 +1,80 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Star, ChevronRight, Play, Users, Award, Clock, CheckCircle, Menu, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Star, ChevronRight, Play, Users, Award, Clock, CheckCircle, Menu, X, ArrowRight } from 'lucide-react';
+import axios from '../config/axios';
+import Footer from '../components/Footer';
 
-const FreelanceHubHomepage = () => {
+const Home = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [featuredGigs, setFeaturedGigs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const heroSlides = [
     {
       title: "Find the perfect freelance services for your business",
-      subtitle: "Millions of people use FreelanceHub to turn their ideas into reality.",
+      subtitle: "Millions of people use CodeHire to turn their ideas into reality.",
       bg: "bg-gradient-to-r from-green-500 to-blue-600",
-      image: "🎨"
+      image: "🎨",
+      cta: "Get Started Today"
     },
     {
       title: "The premium freelance solution for businesses",
-      subtitle: "Connect with top talent and get work done faster.",
+      subtitle: "Connect with top talent and get work done faster than ever.",
       bg: "bg-gradient-to-r from-purple-600 to-pink-600",
-      image: "💼"
+      image: "💼",
+      cta: "Find Talent Now"
     },
     {
       title: "Get your business online with professional websites",
       subtitle: "Custom websites that convert visitors to customers.",
       bg: "bg-gradient-to-r from-orange-500 to-red-600",
-      image: "🌐"
+      image: "🌐",
+      cta: "Start Building"
     }
   ];
 
   const categories = [
-    { name: "Graphics & Design", icon: "🎨", jobs: "389,930" },
-    { name: "Digital Marketing", icon: "📱", jobs: "234,567" },
-    { name: "Writing & Translation", icon: "✍️", jobs: "198,432" },
-    { name: "Video & Animation", icon: "🎬", jobs: "156,789" },
-    { name: "Music & Audio", icon: "🎵", jobs: "89,123" },
-    { name: "Programming & Tech", icon: "💻", jobs: "267,891" },
-    { name: "Business", icon: "💼", jobs: "145,678" },
-    { name: "Lifestyle", icon: "🌟", jobs: "78,456" }
+    { name: "Graphics & Design", icon: "🎨", path: "graphics-design" },
+    { name: "Digital Marketing", icon: "📱", path: "digital-marketing" },
+    { name: "Writing & Translation", icon: "✍️", path: "writing-translation" },
+    { name: "Video & Animation", icon: "🎬", path: "video-animation" },
+    { name: "Music & Audio", icon: "🎵", path: "music-audio" },
+    { name: "Programming & Tech", icon: "💻", path: "programming-tech" },
+    { name: "Business", icon: "💼", path: "business" },
+    { name: "AI Services", icon: "🤖", path: "ai-services" }
   ];
 
-  const popularServices = [
-    {
-      title: "I will design a modern logo for your business",
-      seller: "designpro_x",
-      rating: 4.9,
-      reviews: 2847,
-      price: 25,
-      image: "🎯",
-      level: "Level 2"
-    },
-    {
-      title: "I will create a professional website for you",
-      seller: "webmaster_dev",
-      rating: 5.0,
-      reviews: 1923,
-      price: 75,
-      image: "💻",
-      level: "Top Rated"
-    },
-    {
-      title: "I will write engaging content for your blog",
-      seller: "content_queen",
-      rating: 4.8,
-      reviews: 3456,
-      price: 15,
-      image: "📝",
-      level: "Level 1"
-    },
-    {
-      title: "I will create stunning social media posts",
-      seller: "social_genius",
-      rating: 4.9,
-      reviews: 1567,
-      price: 20,
-      image: "📱",
-      level: "Level 2"
-    }
+  const popularSearches = [
+    'Website Design', 'Logo Design', 'SEO', 'WordPress', 'Voice Over', 
+    'Social Media', 'Article Writing', 'Translation', 'Data Entry', 'Book Covers'
   ];
 
   const testimonials = [
     {
       name: "Sarah Johnson",
       role: "Startup Founder",
-      content: "FreelanceHub has been instrumental in helping me launch my business. The quality of work is exceptional.",
+      content: "CodeHire has been instrumental in helping me launch my business. The quality of work is exceptional and the platform is incredibly user-friendly.",
       avatar: "👩‍💼",
-      rating: 5
+      rating: 5,
+      company: "TechStart Inc."
     },
     {
       name: "Michael Chen",
-      role: "Marketing Director",
-      content: "Found amazing talent for our campaigns. The platform makes it so easy to find the right freelancers.",
+      role: "Marketing Director", 
+      content: "Found amazing talent for our campaigns. The platform makes it so easy to find the right freelancers with verified skills and portfolios.",
       avatar: "👨‍💻",
-      rating: 5
+      rating: 5,
+      company: "Digital Solutions"
     },
     {
       name: "Emma Davis",
       role: "E-commerce Owner",
-      content: "The designers on FreelanceHub helped transform my brand. Couldn't be happier with the results.",
+      content: "The designers on CodeHire helped transform my brand completely. Professional work delivered on time, every time.",
       avatar: "👩‍🎨",
-      rating: 5
+      rating: 5,
+      company: "StyleCraft"
     }
   ];
 
@@ -107,8 +85,54 @@ const FreelanceHubHomepage = () => {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    fetchFeaturedGigs();
+  }, []);
+
+  const fetchFeaturedGigs = async () => {
+    try {
+      const response = await axios.get('/api/gigs');
+      setFeaturedGigs(response.data.slice(0, 8)); // Get first 8 gigs
+    } catch (error) {
+      console.error('Error fetching gigs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = () => {
-    console.log('Searching for:', searchQuery);
+    if (searchQuery.trim()) {
+      navigate(`/client/browse-gigs?search=${encodeURIComponent(searchQuery)}`);
+    } else {
+      navigate('/client/browse-gigs');
+    }
+  };
+
+  const handleCategoryClick = (category) => {
+    navigate(`/client/browse-gigs?category=${encodeURIComponent(category.name)}`);
+  };
+
+  const handleGigClick = (gig) => {
+    navigate(`/client/gig/${gig._id}`);
+  };
+
+  const handlePopularSearch = (term) => {
+    setSearchQuery(term);
+    navigate(`/client/browse-gigs?search=${encodeURIComponent(term)}`);
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const formatGigPrice = (inrPrice) => {
+    const usdPrice = Math.round(inrPrice * 0.012); // Convert INR to USD
+    return formatPrice(usdPrice);
   };
 
   return (
@@ -134,12 +158,13 @@ const FreelanceHubHomepage = () => {
                       placeholder="Search for any service..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full px-4 py-4 rounded-md text-gray-900 text-lg focus:outline-none focus:ring-2 focus:ring-white"
+                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                      className="w-full px-6 py-4 rounded-lg text-gray-900 text-lg focus:outline-none focus:ring-2 focus:ring-white shadow-lg"
                     />
                   </div>
                   <button 
                     onClick={handleSearch}
-                    className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-md font-semibold transition-colors flex items-center justify-center"
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center shadow-lg"
                   >
                     <Search className="mr-2" size={20} />
                     Search
@@ -148,8 +173,12 @@ const FreelanceHubHomepage = () => {
 
                 <div className="mt-8 flex flex-wrap gap-2">
                   <span className="text-white/80">Popular:</span>
-                  {['Website Design', 'Logo Design', 'SEO', 'Architecture', 'Social Media'].map((tag) => (
-                    <button key={tag} className="bg-white/20 text-white px-3 py-1 rounded-full text-sm hover:bg-white/30 transition-colors">
+                  {popularSearches.slice(0, 5).map((tag) => (
+                    <button 
+                      key={tag} 
+                      onClick={() => handlePopularSearch(tag)}
+                      className="bg-white/20 text-white px-3 py-1 rounded-full text-sm hover:bg-white/30 transition-colors"
+                    >
                       {tag}
                     </button>
                   ))}
@@ -179,15 +208,39 @@ const FreelanceHubHomepage = () => {
       </section>
 
       {/* Trusted by Section */}
-      <section className="py-8 bg-gray-50">
+      <section className="py-8 bg-gray-50 border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-600 mb-6">Trusted by:</p>
+          <p className="text-center text-gray-600 mb-6 font-medium">Trusted by:</p>
           <div className="flex justify-center items-center space-x-12 opacity-60">
-            <div className="text-2xl font-bold">META</div>
-            <div className="text-2xl font-bold">GOOGLE</div>
-            <div className="text-2xl font-bold">NETFLIX</div>
-            <div className="text-2xl font-bold">P&G</div>
-            <div className="text-2xl font-bold">PAYPAL</div>
+            <div className="text-2xl font-bold text-gray-700">META</div>
+            <div className="text-2xl font-bold text-gray-700">GOOGLE</div>
+            <div className="text-2xl font-bold text-gray-700">NETFLIX</div>
+            <div className="text-2xl font-bold text-gray-700">PAYPAL</div>
+            <div className="text-2xl font-bold text-gray-700">MICROSOFT</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+            <div className="group">
+              <div className="text-4xl font-bold text-green-600 mb-2 group-hover:scale-110 transition-transform">4M+</div>
+              <p className="text-gray-600 font-medium">Active Buyers</p>
+            </div>
+            <div className="group">
+              <div className="text-4xl font-bold text-blue-600 mb-2 group-hover:scale-110 transition-transform">1.2M+</div>
+              <p className="text-gray-600 font-medium">Active Sellers</p>
+            </div>
+            <div className="group">
+              <div className="text-4xl font-bold text-purple-600 mb-2 group-hover:scale-110 transition-transform">100M+</div>
+              <p className="text-gray-600 font-medium">Orders Completed</p>
+            </div>
+            <div className="group">
+              <div className="text-4xl font-bold text-orange-600 mb-2 group-hover:scale-110 transition-transform">200+</div>
+              <p className="text-gray-600 font-medium">Countries Served</p>
+            </div>
           </div>
         </div>
       </section>
@@ -195,16 +248,26 @@ const FreelanceHubHomepage = () => {
       {/* Popular Categories */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12">Popular professional services</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Popular professional services</h2>
+          <p className="text-center text-gray-600 mb-12 text-lg">Explore our most in-demand categories</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((category, index) => (
-              <div key={index} className="group cursor-pointer">
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                  <div className="text-4xl mb-4">{category.icon}</div>
-                  <h3 className="font-semibold text-lg mb-2 group-hover:text-green-600 transition-colors">
+              <div 
+                key={index} 
+                className="group cursor-pointer"
+                onClick={() => handleCategoryClick(category)}
+              >
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-200 hover:border-green-300">
+                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                    {category.icon}
+                  </div>
+                  <h3 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">
                     {category.name}
                   </h3>
-                  <p className="text-gray-600">{category.jobs} services available</p>
+                  <div className="flex items-center text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-sm font-medium">Explore</span>
+                    <ArrowRight size={16} className="ml-1" />
+                  </div>
                 </div>
               </div>
             ))}
@@ -212,93 +275,144 @@ const FreelanceHubHomepage = () => {
         </div>
       </section>
 
-      {/* Featured Services */}
+      {/* Featured Gigs */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12">Popular services</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {popularServices.map((service, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group cursor-pointer">
-                <div className="relative">
-                  <div className="h-48 bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center">
-                    <div className="text-6xl">{service.image}</div>
-                  </div>
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-orange-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                      {service.level}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center mb-2">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full mr-2"></div>
-                    <span className="text-sm text-gray-600">{service.seller}</span>
-                  </div>
-                  <h3 className="font-medium mb-3 group-hover:text-green-600 transition-colors">
-                    {service.title}
-                  </h3>
-                  <div className="flex items-center mb-3">
-                    <Star className="text-yellow-400 fill-current" size={16} />
-                    <span className="ml-1 text-sm text-gray-600">
-                      {service.rating} ({service.reviews})
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">STARTING AT</span>
-                    <span className="text-xl font-bold">${service.price}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="flex justify-between items-center mb-12">
+            <div>
+              <h2 className="text-4xl font-bold mb-2">Featured services</h2>
+              <p className="text-gray-600 text-lg">Hand-picked by our team</p>
+            </div>
+            <button 
+              onClick={() => navigate('/client/browse-gigs')}
+              className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium flex items-center"
+            >
+              View All
+              <ArrowRight size={18} className="ml-2" />
+            </button>
           </div>
+          
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, index) => (
+                <div key={index} className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">
+                  <div className="h-48 bg-gray-300"></div>
+                  <div className="p-4">
+                    <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-3"></div>
+                    <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredGigs.map((gig, index) => (
+                <div 
+                  key={gig._id} 
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer transform hover:-translate-y-1"
+                  onClick={() => handleGigClick(gig)}
+                >
+                  <div className="relative">
+                    <img
+                      src={gig.image || `https://picsum.photos/400/300?random=${index}`}
+                      alt={gig.title}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-3 left-3">
+                      <span className="bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
+                        Featured
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center mb-3">
+                      <img
+                        src={gig.sellerId?.avatar || `https://ui-avatars.com/api/?name=${gig.sellerId?.name}&background=random`}
+                        alt={gig.sellerId?.name}
+                        className="w-8 h-8 rounded-full mr-2"
+                      />
+                      <span className="text-sm text-gray-600 font-medium">{gig.sellerId?.name}</span>
+                    </div>
+                    <h3 className="font-semibold mb-3 group-hover:text-green-600 transition-colors line-clamp-2">
+                      {gig.title}
+                    </h3>
+                    <div className="flex items-center mb-3">
+                      <div className="flex items-center">
+                        <Star className="text-yellow-400 fill-current" size={16} />
+                        <span className="ml-1 text-sm text-gray-600 font-medium">
+                          {gig.rating || '5.0'} ({gig.reviews?.length || Math.floor(Math.random() * 100) + 10})
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500 text-sm">STARTING AT</span>
+                      <span className="text-xl font-bold text-gray-900">{formatGigPrice(gig.price)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Why FreelanceHub Section */}
+      {/* Why Choose Us Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <h2 className="text-4xl font-bold mb-8">
+              <h2 className="text-4xl font-bold mb-8 leading-tight">
                 A whole world of freelance talent at your fingertips
               </h2>
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div className="flex items-start">
-                  <CheckCircle className="text-green-600 mr-4 mt-1" size={24} />
+                  <div className="bg-green-100 p-2 rounded-lg mr-4 mt-1">
+                    <CheckCircle className="text-green-600" size={24} />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">The best for every budget</h3>
-                    <p className="text-gray-600">Find high-quality services at every price point. No hourly rates, just project-based pricing.</p>
+                    <h3 className="font-bold text-xl mb-3">The best for every budget</h3>
+                    <p className="text-gray-600 text-lg">Find high-quality services at every price point. No hourly rates, just project-based pricing.</p>
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <CheckCircle className="text-green-600 mr-4 mt-1" size={24} />
+                  <div className="bg-green-100 p-2 rounded-lg mr-4 mt-1">
+                    <Clock className="text-green-600" size={24} />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Quality work done quickly</h3>
-                    <p className="text-gray-600">Find the right freelancer to begin working on your project within minutes.</p>
+                    <h3 className="font-bold text-xl mb-3">Quality work done quickly</h3>
+                    <p className="text-gray-600 text-lg">Find the right freelancer to begin working on your project within minutes.</p>
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <CheckCircle className="text-green-600 mr-4 mt-1" size={24} />
+                  <div className="bg-green-100 p-2 rounded-lg mr-4 mt-1">
+                    <Award className="text-green-600" size={24} />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">Protected payments, every time</h3>
-                    <p className="text-gray-600">Always know what you'll pay upfront. Your payment isn't released until you approve the work.</p>
+                    <h3 className="font-bold text-xl mb-3">Protected payments, every time</h3>
+                    <p className="text-gray-600 text-lg">Always know what you'll pay upfront. Your payment isn't released until you approve the work.</p>
                   </div>
                 </div>
                 <div className="flex items-start">
-                  <CheckCircle className="text-green-600 mr-4 mt-1" size={24} />
+                  <div className="bg-green-100 p-2 rounded-lg mr-4 mt-1">
+                    <Users className="text-green-600" size={24} />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-2">24/7 support</h3>
-                    <p className="text-gray-600">Find answers to your questions in our help center, or contact our customer support team.</p>
+                    <h3 className="font-bold text-xl mb-3">24/7 support</h3>
+                    <p className="text-gray-600 text-lg">Find answers to your questions in our help center, or contact our customer support team.</p>
                   </div>
                 </div>
               </div>
             </div>
             <div className="relative">
-              <div className="bg-gradient-to-r from-green-400 to-blue-500 rounded-lg p-8 text-white">
-                <div className="text-6xl mb-4">🚀</div>
-                <h3 className="text-2xl font-bold mb-4">Ready to get started?</h3>
-                <p className="mb-6">Join millions of entrepreneurs who trust FreelanceHub to get things done.</p>
-                <button className="bg-white text-green-600 px-6 py-3 rounded-md font-semibold hover:bg-gray-100 transition-colors">
+              <div className="bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl p-10 text-white shadow-2xl">
+                <div className="text-7xl mb-6">🚀</div>
+                <h3 className="text-3xl font-bold mb-4">Ready to get started?</h3>
+                <p className="mb-8 text-lg opacity-90">Join millions of entrepreneurs who trust CodeHire to get things done.</p>
+                <button 
+                  onClick={() => navigate('/client/browse-gigs')}
+                  className="bg-white text-green-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors text-lg"
+                >
                   Get Started Now
                 </button>
               </div>
@@ -310,21 +424,23 @@ const FreelanceHubHomepage = () => {
       {/* Testimonials */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12">What our customers say</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">What our customers say</h2>
+          <p className="text-center text-gray-600 mb-12 text-lg">Real stories from real customers</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow">
-                <div className="flex items-center mb-4">
+              <div key={index} className="bg-white rounded-xl p-8 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+                <div className="flex items-center mb-6">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="text-yellow-400 fill-current" size={16} />
+                    <Star key={i} className="text-yellow-400 fill-current" size={20} />
                   ))}
                 </div>
-                <p className="text-gray-600 mb-6 italic">"{testimonial.content}"</p>
+                <p className="text-gray-700 mb-6 text-lg leading-relaxed italic">"{testimonial.content}"</p>
                 <div className="flex items-center">
-                  <div className="text-3xl mr-3">{testimonial.avatar}</div>
+                  <div className="text-3xl mr-4">{testimonial.avatar}</div>
                   <div>
-                    <h4 className="font-semibold">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
+                    <h4 className="font-bold text-lg text-gray-900">{testimonial.name}</h4>
+                    <p className="text-gray-600 text-sm">{testimonial.role}</p>
+                    <p className="text-green-600 text-sm font-medium">{testimonial.company}</p>
                   </div>
                 </div>
               </div>
@@ -333,133 +449,36 @@ const FreelanceHubHomepage = () => {
         </div>
       </section>
 
-      {/* Call to Action Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-white mb-8">
-            Start your freelance journey today
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-green-600 to-blue-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Freelance services at your fingertips!
           </h2>
-          <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto">
-            Whether you're looking to hire talented freelancers or showcase your own skills, FreelanceHub is the perfect platform to achieve your goals.
+          <p className="text-xl text-white/90 mb-8">
+            Join our community of millions and get your project done today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-md font-semibold hover:bg-gray-100 transition-colors text-lg">
-              Hire Freelancers
+            <button 
+              onClick={() => navigate('/client/browse-gigs')}
+              className="bg-white text-green-600 px-8 py-4 rounded-lg font-bold hover:bg-gray-100 transition-colors text-lg"
+            >
+              Browse Services
             </button>
-            <button className="border-2 border-white text-white px-8 py-4 rounded-md font-semibold hover:bg-white hover:text-blue-600 transition-colors text-lg">
+            <button 
+              onClick={() => navigate('/freelancer/dashboard')}
+              className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-green-600 transition-colors text-lg"
+            >
               Become a Seller
             </button>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <div className="p-6">
-              <div className="text-5xl font-bold text-green-600 mb-2">4M+</div>
-              <p className="text-gray-600 text-lg">Active Users</p>
-            </div>
-            <div className="p-6">
-              <div className="text-5xl font-bold text-blue-600 mb-2">500K+</div>
-              <p className="text-gray-600 text-lg">Projects Completed</p>
-            </div>
-            <div className="p-6">
-              <div className="text-5xl font-bold text-purple-600 mb-2">99%</div>
-              <p className="text-gray-600 text-lg">Customer Satisfaction</p>
-            </div>
-            <div className="p-6">
-              <div className="text-5xl font-bold text-orange-600 mb-2">24/7</div>
-              <p className="text-gray-600 text-lg">Support Available</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="text-3xl font-bold text-green-400 mb-4">FreelanceHub</div>
-              <p className="text-gray-300 mb-4">The world's largest marketplace for creative and professional services.</p>
-              <div className="flex space-x-4">
-                <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors cursor-pointer">
-                  <span>📘</span>
-                </div>
-                <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors cursor-pointer">
-                  <span>🐦</span>
-                </div>
-                <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors cursor-pointer">
-                  <span>📷</span>
-                </div>
-                <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors cursor-pointer">
-                  <span>💼</span>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-lg">Categories</h3>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">Graphics & Design</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Digital Marketing</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Writing & Translation</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Video & Animation</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Programming & Tech</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Business Services</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-lg">About</h3>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Press & News</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Partnerships</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Intellectual Property</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4 text-lg">Support</h3>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">Help & Support</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Trust & Safety</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Selling on FreelanceHub</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Buying on FreelanceHub</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Community Standards</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400">© 2025 FreelanceHub International Ltd. All rights reserved.</p>
-            <div className="flex items-center space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Cookie Settings</a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Sitemap</a>
-              <div className="flex items-center space-x-2">
-                <span className="text-gray-400">🌍</span>
-                <select className="bg-transparent text-gray-400 border-none outline-none">
-                  <option>English</option>
-                  <option>Español</option>
-                  <option>Français</option>
-                </select>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-gray-400">💰</span>
-                <select className="bg-transparent text-gray-400 border-none outline-none">
-                  <option>USD</option>
-                  <option>EUR</option>
-                  <option>GBP</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
 
-export default FreelanceHubHomepage;
+export default Home;

@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import axios from '../config/axios';
 import { useAuth } from '../hooks/AuthContext';
+import PageHeader from '../components/PageHeader';
+import { Edit, Trash2, Eye, Plus, DollarSign, Clock } from 'lucide-react';
 
 const MyGigs = ({ goBack, onEdit }) => {
+  const navigate = useNavigate();
   const [gigs, setGigs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -11,9 +15,7 @@ const MyGigs = ({ goBack, onEdit }) => {
   const fetchGigs = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/gigs/mine', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get('/api/gigs/mine');
       setGigs(res.data);
     } catch (err) {
       console.error('Failed to load gigs:', err.response?.data || err.message);
@@ -24,9 +26,7 @@ const MyGigs = ({ goBack, onEdit }) => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/gigs/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(`/api/gigs/${id}`);
       setMessage('Gig deleted successfully.');
       fetchGigs();
     } catch (err) {
@@ -40,78 +40,115 @@ const MyGigs = ({ goBack, onEdit }) => {
   }, [token]);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      {goBack && (
+    <div className="min-h-screen bg-gray-50">
+      <PageHeader
+        title="My Services"
+        subtitle={`Manage your ${gigs.length} active services`}
+        showBackButton={true}
+        backButtonProps={{
+          onClick: goBack || (() => navigate(-1)),
+          label: "Back"
+        }}
+      >
         <button
-          onClick={goBack}
-          className="mb-4 px-4 py-2 bg-gray-200 text-sm font-medium rounded hover:bg-gray-300"
+          onClick={() => navigate('/freelancer/create-gig')}
+          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-medium flex items-center gap-2"
         >
-          ← Back
+          <Plus className="h-4 w-4" />
+          Create New Service
         </button>
-      )}
+      </PageHeader>
 
-      <h2 className="text-3xl font-bold mb-6 text-center">📁 My Gigs</h2>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {message && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-800 font-medium text-center">{message}</p>
+          </div>
+        )}
 
-      {message && (
-        <p className="mb-4 text-green-600 font-medium text-center">{message}</p>
-      )}
-
-      {loading ? (
-        <p className="text-center text-gray-600">Loading gigs...</p>
-      ) : gigs.length === 0 ? (
-        <p className="text-center text-gray-500">No gigs found.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {gigs.map((gig) => (
-            <div
-              key={gig._id}
-              className="bg-white border rounded-xl shadow-md hover:shadow-lg transition duration-300 overflow-hidden"
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your services...</p>
+          </div>
+        ) : gigs.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">📁</div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No services yet</h3>
+            <p className="text-gray-600 mb-6">Create your first service to start earning!</p>
+            <button
+              onClick={() => window.location.href = '/freelancer/create-gig'}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-medium inline-flex items-center gap-2"
             >
-              {gig.image && (
-                <img
-                  src={gig.image}
-                  alt={gig.title}
-                  className="w-full h-48 object-cover"
-                />
-              )}
-              <div className="p-4">
-                <h3 className="text-xl font-semibold mb-1">{gig.title}</h3>
-                <p className="text-gray-500 text-sm mb-2 italic">
-                  {gig.description}
-                </p>
-                <div className="text-sm space-y-1">
-                  <p>
-                    <span className="font-semibold">Category:</span>{' '}
-                    {gig.category}
+              <Plus className="h-4 w-4" />
+              Create Your First Service
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {gigs.map((gig) => (
+              <div
+                key={gig._id}
+                className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 overflow-hidden"
+              >
+                {(gig.image || (gig.images && gig.images[0])) && (
+                  <img
+                    src={gig.image || gig.images[0]}
+                    alt={gig.title}
+                    className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                )}
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                    {gig.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {gig.description}
                   </p>
-                  <p>
-                    <span className="font-semibold">Price:</span> ₹{gig.price}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Delivery:</span>{' '}
-                    {gig.deliveryTime} day(s)
-                  </p>
-                </div>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                        {gig.category}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-1 text-green-600">
+                        <DollarSign className="h-4 w-4" />
+                        <span className="font-semibold">₹{gig.price}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-gray-600">
+                        <Clock className="h-4 w-4" />
+                        <span>{gig.deliveryTime} days</span>
+                      </div>
+                    </div>
+                  </div>
 
-                <div className="flex gap-3 mt-4">
-                  <button
-                    onClick={() => onEdit(gig)}
-                    className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(gig._id)}
-                    className="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 transition"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => onEdit ? onEdit(gig) : navigate(`/freelancer/edit-gig/${gig._id}`)}
+                      className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm flex items-center justify-center gap-1"
+                    >
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(gig._id)}
+                      className="flex-1 bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors font-medium text-sm flex items-center justify-center gap-1"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

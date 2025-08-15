@@ -35,7 +35,7 @@ const SignIn = ({ onSwitchToRegister, onSuccess }) => {
         if (onSuccess) onSuccess();
 
         if (user.role === "freelancer") {
-          navigate("/freelancer/profile");
+          navigate("/freelancer/dashboard");
         } else if (user.role === "client") {
           navigate("/client/profile");
         } else {

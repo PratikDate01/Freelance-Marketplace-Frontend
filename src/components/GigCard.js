@@ -14,7 +14,7 @@ const GigCard = ({ gig }) => {
       className="border p-4 rounded-xl shadow hover:shadow-lg transition cursor-pointer"
     >
       <img
-        src={gig.image || "https://via.placeholder.com/300"}
+        src={gig.image || "https://placehold.co/300"}
         alt={gig.title}
         className="w-full h-40 object-cover rounded-md mb-3"
       />

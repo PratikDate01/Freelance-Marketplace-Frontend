@@ -1,3 +1,34 @@
+# CodeHire - Professional Freelance Services Marketplace
 # https://www.robotstxt.org/robotstxt.html
+
 User-agent: *
-Disallow:
+Allow: /
+Allow: /client/browse-gigs
+Allow: /client/gig/*
+
+# Disallow private/sensitive areas
+Disallow: /client/profile
+Disallow: /client/orders
+Disallow: /client/messages
+Disallow: /freelancer/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /settings
+Disallow: /billing
+Disallow: /notifications
+
+# Allow specific bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Crawl delay
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://your-app-name.vercel.app/sitemap.xml

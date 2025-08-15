@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/AuthContext";
-import { FiBell, FiMail, FiHeart, FiSearch } from "react-icons/fi";
+import { FiSearch } from "react-icons/fi";
+import NotificationDropdown from "./NotificationDropdown";
+import PaymentNotifications from "./PaymentNotifications";
+import ChatNotifications from "./ChatNotifications";
+import axios from "../config/axios";
 
 const DashboardNavbar = () => {
   const { user, logout } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -19,20 +22,11 @@ const DashboardNavbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      if (user.role === "freelancer") {
-        navigate("/freelancer/profile");
-      } else if (user.role === "client") {
-        navigate("/client/profile");
-      }
-    }
-  }, [user, navigate]);
+  // Removed auto-redirect to allow navigation to other pages
+  // Role-based access control is handled by ProtectedRoute component
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/");
+    logout(); // Use the logout function from AuthContext
   };
 
   const getAvatarLetter = () => {
@@ -42,7 +36,7 @@ const DashboardNavbar = () => {
   };
 
   const getProfileLink = () => {
-    if (user?.role === "freelancer") return "/freelancer/profile";
+    if (user?.role === "freelancer") return "/freelancer/dashboard";
     if (user?.role === "client") return "/client/profile";
     return "#";
   };
@@ -67,11 +61,25 @@ const DashboardNavbar = () => {
           </button>
         </div>
 
-        <div className="flex items-center gap-6">
-          <FiBell className="text-xl text-gray-700 cursor-pointer" />
-          <FiMail className="text-xl text-gray-700 cursor-pointer" />
-          <FiHeart className="text-xl text-gray-700 cursor-pointer" />
-          <Link to="#" className="text-gray-700 hover:text-green-600">
+        <div className="flex items-center gap-4">
+          <NotificationDropdown />
+          
+          {/* Payment Notifications */}
+          <PaymentNotifications />
+          
+          {/* Chat Notifications */}
+          <ChatNotifications onOpenChat={(conversationId) => {
+            const messagesUrl = user?.role === 'client' 
+              ? `/client/messages?conversation=${conversationId}`
+              : `/freelancer/messages?conversation=${conversationId}`;
+            window.location.href = messagesUrl;
+          }} />
+          
+
+          <Link 
+            to={user?.role === "client" ? "/client/orders" : "/freelancer/orders"} 
+            className="text-gray-700 hover:text-green-600"
+          >
             Orders
           </Link>
 
@@ -93,19 +101,49 @@ const DashboardNavbar = () => {
                   <Link to={getProfileLink()} className="block px-4 py-2 hover:bg-gray-100">
                     Profile
                   </Link>
-                  <Link to="#" className="block px-4 py-2 hover:bg-gray-100">
-                    Post a project brief
+                  
+                  {user?.role === "client" && (
+                    <>
+                      <Link to="/client/browse-gigs" className="block px-4 py-2 hover:bg-gray-100">
+                        Browse Services
+                      </Link>
+                      <Link to="/client/orders" className="block px-4 py-2 hover:bg-gray-100">
+                        My Orders
+                      </Link>
+                    </>
+                  )}
+                  
+                  {user?.role === "freelancer" && (
+                    <>
+                      <Link to="/freelancer/dashboard" className="block px-4 py-2 hover:bg-gray-100">
+                        Dashboard
+                      </Link>
+                      <Link to="/freelancer/orders" className="block px-4 py-2 hover:bg-gray-100">
+                        My Orders
+                      </Link>
+                      <Link to="/freelancer/my-gigs" className="block px-4 py-2 hover:bg-gray-100">
+                        My Services
+                      </Link>
+                      <Link to="/freelancer/create-gig" className="block px-4 py-2 hover:bg-gray-100">
+                        Create Service
+                      </Link>
+                      <Link to="/freelancer/earnings" className="block px-4 py-2 hover:bg-gray-100">
+                        Earnings
+                      </Link>
+                    </>
+                  )}
+                  
+                  <Link 
+                    to={user?.role === 'client' ? '/client/messages' : '/freelancer/messages'} 
+                    className="block px-4 py-2 hover:bg-gray-100"
+                  >
+                    Messages
                   </Link>
-                  <Link to="#" className="block px-4 py-2 hover:bg-gray-100">
-                    Your briefs
-                  </Link>
+                  
                   <Link to="#" className="block px-4 py-2 hover:bg-gray-100 text-green-600">
                     Refer a friend
                   </Link>
                   <Link to="#" className="block px-4 py-2 hover:bg-gray-100">
-                    Become a Seller
-                  </Link>
-                  <Link to="/settings" className="block px-4 py-2 hover:bg-gray-100">
                     Account settings
                   </Link>
                   <Link to="#" className="block px-4 py-2 hover:bg-gray-100">
@@ -116,9 +154,7 @@ const DashboardNavbar = () => {
 
                   <div className="flex items-center justify-between px-4 py-2">
                     <span>Exclusive features</span>
-                    <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
-                      Fiverr Pro
-                    </span>
+                   
                   </div>
 
                   <button

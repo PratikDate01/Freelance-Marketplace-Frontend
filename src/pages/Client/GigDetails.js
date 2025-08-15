@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Heart, Share2, Flag, Shield, Award, Clock, RefreshCw, CheckCircle, Star, MessageCircle } from "lucide-react";
+import PageHeader from "../../components/PageHeader";
+import BackButton from "../../components/BackButton";
+import { formatPrice, convertINRToUSD } from "../../utils/currency";
 import axios from "axios";
 
 const GigDetails = ({ gig, goBack }) => {
@@ -11,6 +15,8 @@ const GigDetails = ({ gig, goBack }) => {
   const [activeTab, setActiveTab] = useState('description');
   const [fetchedGig, setFetchedGig] = useState(null); // For route-based usage
   const [loading, setLoading] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
 
   const currentGig = gig || fetchedGig;
@@ -71,6 +77,20 @@ const GigDetails = ({ gig, goBack }) => {
     navigate(`/client/place-order/${currentGig._id}`);
   };
 
+  const formatGigPrice = (inrPrice) => {
+    const usdPrice = convertINRToUSD(inrPrice);
+    return formatPrice(usdPrice);
+  };
+
+  const toggleFavorite = () => {
+    setIsFavorite(!isFavorite);
+    // Here you would typically save to backend
+  };
+
+  const handleShare = () => {
+    setShowShareModal(true);
+  };
+
   // Handle back navigation for both route and prop usage
   const handleGoBack = () => {
     if (goBack) {
@@ -108,19 +128,14 @@ const GigDetails = ({ gig, goBack }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Navigation */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <button
-            onClick={handleGoBack}
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            <span className="text-sm font-medium">Back</span>
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Service Details"
+        subtitle="Review the service and place your order"
+        backButtonProps={{
+          onClick: handleGoBack,
+          label: goBack ? "Back" : "Back to Browse"
+        }}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -128,10 +143,42 @@ const GigDetails = ({ gig, goBack }) => {
           <div className="lg:col-span-2">
             {/* Gig Header */}
             <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded">
-                  {currentGig.category}
-                </span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded">
+                    {currentGig.category}
+                  </span>
+                  {currentGig.sellerId?.level === 'top' && (
+                    <span className="px-2 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold rounded flex items-center gap-1">
+                      <Award size={12} />
+                      PRO
+                    </span>
+                  )}
+                  {currentGig.deliveryTime <= 1 && (
+                    <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
+                      Express 24H
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={toggleFavorite}
+                    className={`p-2 rounded-full transition-colors ${
+                      isFavorite ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white'
+                    }`}
+                  >
+                    <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-blue-500 hover:text-white transition-colors"
+                  >
+                    <Share2 size={18} />
+                  </button>
+                  <button className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white transition-colors">
+                    <Flag size={18} />
+                  </button>
+                </div>
               </div>
               <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
                 {currentGig.title}
@@ -141,7 +188,7 @@ const GigDetails = ({ gig, goBack }) => {
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center gap-2">
                   <img
-                    src={currentGig.sellerId?.avatar || "/default-avatar.png"}
+                    src={currentGig.sellerId?.avatar || currentGig.sellerId?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentGig.sellerId?.name || 'User')}&background=10b981&color=fff`}
                     alt={currentGig.sellerId?.name}
                     className="w-8 h-8 rounded-full object-cover"
                   />
@@ -166,9 +213,12 @@ const GigDetails = ({ gig, goBack }) => {
             {/* Gig Image */}
             <div className="mb-8">
               <img
-                src={currentGig.image || "https://via.placeholder.com/800x450"}
+                src={currentGig.image || (currentGig.images && currentGig.images[0]) || "https://placehold.co/800x450"}
                 alt={currentGig.title}
                 className="w-full h-64 lg:h-96 object-cover rounded-lg"
+                onError={(e) => {
+                  e.target.src = "https://placehold.co/800x450";
+                }}
               />
             </div>
 
@@ -251,7 +301,7 @@ const GigDetails = ({ gig, goBack }) => {
                 <div>
                   <div className="flex items-start gap-4 mb-6">
                     <img
-                      src={currentGig.sellerId.avatar || "/default-avatar.png"}
+                      src={currentGig.sellerId.avatar || currentGig.sellerId.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentGig.sellerId.name || 'User')}&background=10b981&color=fff`}
                       alt={currentGig.sellerId.name}
                       className="w-16 h-16 rounded-full object-cover"
                     />
@@ -319,17 +369,22 @@ const GigDetails = ({ gig, goBack }) => {
                                 <h4 className="font-semibold text-gray-900 text-sm">
                                   {r.user?.name || "Anonymous User"}
                                 </h4>
-                                <div className="flex items-center gap-1">
-                                  {[...Array(5)].map((_, i) => (
-                                    <svg
-                                      key={i}
-                                      className={`w-4 h-4 ${i < r.rating ? 'text-yellow-400' : 'text-gray-200'}`}
-                                      fill="currentColor"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                    </svg>
-                                  ))}
+                                <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-1">
+                                    {[...Array(5)].map((_, i) => (
+                                      <svg
+                                        key={i}
+                                        className={`w-4 h-4 ${i < r.rating ? 'text-yellow-400' : 'text-gray-200'}`}
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                      </svg>
+                                    ))}
+                                  </div>
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(r.createdAt).toLocaleString()}
+                                  </span>
                                 </div>
                               </div>
                               <p className="text-gray-700 text-sm leading-relaxed">{r.comment}</p>
@@ -397,9 +452,10 @@ const GigDetails = ({ gig, goBack }) => {
                 {/* Package Header */}
                 <div className="border-b border-gray-200 p-6">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-gray-900">Basic</h3>
+                    <h3 className="font-semibold text-gray-900">Basic Package</h3>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900">₹{currentGig.price}</div>
+                      <div className="text-2xl font-bold text-gray-900">{formatGigPrice(currentGig.price)}</div>
+                      <div className="text-xs text-gray-500">Starting price</div>
                     </div>
                   </div>
                   <p className="text-gray-600 text-sm mb-4">Essential features for getting started</p>
@@ -415,26 +471,39 @@ const GigDetails = ({ gig, goBack }) => {
 
                 {/* Package Features */}
                 <div className="p-6 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-3">What's included</h4>
                   <ul className="space-y-3">
                     <li className="flex items-center gap-2 text-sm">
-                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <CheckCircle className="w-4 h-4 text-green-500" />
                       <span className="text-gray-700">Source code included</span>
                     </li>
                     <li className="flex items-center gap-2 text-sm">
-                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">1 revision</span>
+                      <RefreshCw className="w-4 h-4 text-green-500" />
+                      <span className="text-gray-700">1 revision included</span>
                     </li>
                     <li className="flex items-center gap-2 text-sm">
-                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <Shield className="w-4 h-4 text-green-500" />
                       <span className="text-gray-700">Commercial license</span>
                     </li>
+                    <li className="flex items-center gap-2 text-sm">
+                      <Clock className="w-4 h-4 text-green-500" />
+                      <span className="text-gray-700">{currentGig.deliveryTime} day delivery</span>
+                    </li>
                   </ul>
+                  
+                  {/* Trust Badges */}
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1 text-green-600">
+                        <Shield size={12} />
+                        <span>Money-back guarantee</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-blue-600">
+                        <MessageCircle size={12} />
+                        <span>24/7 support</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Continue Button */}
@@ -443,7 +512,7 @@ const GigDetails = ({ gig, goBack }) => {
                     onClick={handleOrder}
                     className="w-full bg-green-500 text-white py-3 rounded-md font-semibold hover:bg-green-600 transition-colors duration-200 mb-3"
                   >
-                    Continue (₹{currentGig.price})
+                    Continue ({formatGigPrice(currentGig.price)})
                   </button>
                   
                   <button className="w-full border border-gray-300 text-gray-700 py-2 rounded-md font-medium hover:bg-gray-50 transition-colors duration-200">
@@ -455,6 +524,47 @@ const GigDetails = ({ gig, goBack }) => {
           </div>
         </div>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Share this gig</h3>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-3">
+              <button className="w-full flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">f</div>
+                <span>Share on Facebook</span>
+              </button>
+              <button className="w-full flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50">
+                <div className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center text-white text-sm">t</div>
+                <span>Share on Twitter</span>
+              </button>
+              <button className="w-full flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">in</div>
+                <span>Share on LinkedIn</span>
+              </button>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert('Link copied to clipboard!');
+                }}
+                className="w-full flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50"
+              >
+                <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white text-sm">🔗</div>
+                <span>Copy link</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

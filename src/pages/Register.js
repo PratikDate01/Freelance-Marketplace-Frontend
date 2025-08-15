@@ -47,7 +47,7 @@ const Register = ({ onSwitchToSignIn, onClose }) => {
         if (onClose) onClose();
 
         if (user.role === "freelancer") {
-          navigate("/freelancer/profile");
+          navigate("/freelancer/dashboard");
         } else {
           navigate("/client/profile");
         }
