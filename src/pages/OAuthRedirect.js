@@ -11,11 +11,25 @@ const OAuthRedirect = () => {
   useEffect(() => {
     const fetchOAuthUser = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/auth/success", {
-          withCredentials: true,
-        });
+        // Support both server-issued JWT via query param and legacy /success fetch
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromQuery = urlParams.get('token');
 
-        const { user, token } = res.data;
+        let user, token;
+        if (tokenFromQuery) {
+          token = tokenFromQuery;
+          // Fetch current user using the token
+          const me = await axios.get("http://localhost:5000/api/auth/me", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          user = me.data;
+        } else {
+          const res = await axios.get("http://localhost:5000/api/auth/success", {
+            withCredentials: true,
+          });
+          ({ user, token } = res.data);
+        }
+
         // Save to localStorage and context
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));

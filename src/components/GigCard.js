@@ -20,7 +20,7 @@ const GigCard = ({ gig }) => {
       />
       <h2 className="text-lg font-semibold">{gig.title}</h2>
       <p className="text-sm text-gray-600">{gig.description}</p>
-      <p className="font-bold mt-2">₹{gig.price}</p>
+      <p className="font-bold mt-2">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round((gig.price || 0) * 0.012))}</p>
       <p className="text-xs text-gray-500 mt-1">
         Delivery in {gig.deliveryTime} day(s)
       </p>

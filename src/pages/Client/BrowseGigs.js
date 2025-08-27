@@ -95,14 +95,15 @@ const BrowseGigs = ({ goBack, onGigSelect }) => {
       filtered = filtered.filter(gig => gig.category === selectedCategory);
     }
 
-    // Price range filter (convert USD input to INR for comparison)
+    // Price range filter (treat gig.price as INR and convert to USD for comparison)
+    const rate = 0.012;
     if (priceRange.min) {
-      const minInINR = parseInt(priceRange.min) / 0.012; // Convert USD to INR
-      filtered = filtered.filter(gig => gig.price >= minInINR);
+      const minUsd = parseFloat(priceRange.min);
+      filtered = filtered.filter(gig => Math.round((gig.price || 0) * rate) >= minUsd);
     }
     if (priceRange.max) {
-      const maxInINR = parseInt(priceRange.max) / 0.012; // Convert USD to INR
-      filtered = filtered.filter(gig => gig.price <= maxInINR);
+      const maxUsd = parseFloat(priceRange.max);
+      filtered = filtered.filter(gig => Math.round((gig.price || 0) * rate) <= maxUsd);
     }
 
     // Delivery time filter

@@ -118,7 +118,7 @@ const MyGigs = ({ goBack, onEdit }) => {
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-1 text-green-600">
                         <DollarSign className="h-4 w-4" />
-                        <span className="font-semibold">₹{gig.price}</span>
+                        <span className="font-semibold">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round((gig.price || 0) * 0.012))}</span>
                       </div>
                       <div className="flex items-center gap-1 text-gray-600">
                         <Clock className="h-4 w-4" />

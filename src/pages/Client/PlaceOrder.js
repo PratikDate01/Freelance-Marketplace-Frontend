@@ -36,16 +36,17 @@ const PlaceOrder = () => {
   const calculatePricing = () => {
     if (!gig) return { amount: 0, serviceFee: 0, total: 0, usdAmount: 0, usdServiceFee: 0, usdTotal: 0 };
     
-    const amount = gig.price; // INR price from backend
-    const serviceFee = Math.round(amount * 0.05); // 5% service fee in INR
-    const total = amount + serviceFee; // Total in INR
-    
-    // Convert to USD for display
-    const usdAmount = convertINRToUSD(amount);
-    const usdServiceFee = convertINRToUSD(serviceFee);
-    const usdTotal = convertINRToUSD(total);
-    
-    return { amount, serviceFee, total, usdAmount, usdServiceFee, usdTotal };
+    const rate = 0.012; // INR -> USD
+    const inrAmount = gig.price;
+    const inrServiceFee = Math.round(inrAmount * 0.05);
+    const inrTotal = inrAmount + inrServiceFee;
+
+    // Convert to USD
+    const amount = Math.round(inrAmount * rate);
+    const serviceFee = Math.round(inrServiceFee * rate);
+    const total = Math.round(inrTotal * rate);
+
+    return { amount, serviceFee, total, usdAmount: amount, usdServiceFee: serviceFee, usdTotal: total };
   };
 
   const handleCreateOrder = async () => {
@@ -242,7 +243,7 @@ const PlaceOrder = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-green-600">{formatPrice(convertINRToUSD(gig.price))}</p>
+                  <p className="text-lg font-bold text-green-600">{formatPrice(Math.round((gig.price || 0) * 0.012))}</p>
                   <p className="text-sm text-gray-500">{gig.deliveryTime} days delivery</p>
                 </div>
               </div>
@@ -258,7 +259,7 @@ const PlaceOrder = () => {
                         <p className="text-sm text-gray-600">Standard delivery with 1 revision</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-green-600">{formatPrice(convertINRToUSD(gig.price))}</p>
+                        <p className="text-lg font-bold text-green-600">{formatPrice(Math.round((gig.price || 0) * 0.012))}</p>
                         <p className="text-sm text-gray-500">{gig.deliveryTime} days</p>
                       </div>
                     </div>

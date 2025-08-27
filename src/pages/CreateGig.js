@@ -246,7 +246,6 @@ const CreateGig = ({ goBack }) => {
                     accept="image/*"
                     onChange={handleFileChange}
                     className="hidden"
-                    required
                   />
                 </label>
                 <p className="text-sm text-gray-500 mt-2">PNG, JPG up to 5MB</p>

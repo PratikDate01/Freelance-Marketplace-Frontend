@@ -192,7 +192,7 @@ const Orders = ({ goBack }) => {
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
-                      <p className="text-lg font-bold text-gray-900 mt-2">{formatPrice(convertINRToUSD(order.totalAmount))}</p>
+                      <p className="text-lg font-bold text-gray-900 mt-2">{formatPrice(order.totalAmount)}</p>
                     </div>
                   </div>
 
