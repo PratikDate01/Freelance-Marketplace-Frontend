@@ -3,6 +3,7 @@ import AuthLayout from "../components/AuthLayout";
 import { toast } from "react-toastify";
 import { useAuth } from "../hooks/AuthContext";
 import { useNavigate } from "react-router-dom";
+import config from "../config/environment"; // Use env-based API URL
 
 const SignIn = ({ onSwitchToRegister, onSuccess }) => {
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -12,14 +13,14 @@ const SignIn = ({ onSwitchToRegister, onSuccess }) => {
   const navigate = useNavigate();
 
   const handleGoogleLogin = () => {
-    window.open("http://localhost:5000/api/auth/google", "_self");
+    window.open(`${config.API_URL}/api/auth/google`, "_self");
   };
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${config.API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
