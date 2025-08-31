@@ -3,32 +3,24 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/AuthContext";
+import config from "../config/environment";
 
 const OAuthRedirect = () => {
   const navigate = useNavigate();
-  const { setAuthData } = useAuth(); // From context
+  const { setAuthData } = useAuth();
 
   useEffect(() => {
     const fetchOAuthUser = async () => {
       try {
-        // Support both server-issued JWT via query param and legacy /success fetch
         const urlParams = new URLSearchParams(window.location.search);
-        const tokenFromQuery = urlParams.get('token');
+        const token = urlParams.get('token');
+        if (!token) throw new Error('Missing token from OAuth redirect');
 
-        let user, token;
-        if (tokenFromQuery) {
-          token = tokenFromQuery;
-          // Fetch current user using the token
-          const me = await axios.get("http://localhost:5000/api/auth/me", {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          user = me.data;
-        } else {
-          const res = await axios.get("http://localhost:5000/api/auth/success", {
-            withCredentials: true,
-          });
-          ({ user, token } = res.data);
-        }
+        // Fetch current user using the token
+        const me = await axios.get(`${config.API_URL}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const user = me.data;
 
         // Save to localStorage and context
         localStorage.setItem("token", token);
@@ -43,7 +35,7 @@ const OAuthRedirect = () => {
         }
       } catch (err) {
         console.error("OAuth Redirect Error:", err);
-        navigate("/signin"); // fallback if error
+        navigate("/signin");
       }
     };
 
