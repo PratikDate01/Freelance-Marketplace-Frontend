@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import io from 'socket.io-client';
+import config from '../config/environment';
 
 const useSocket = () => {
   const { user } = useAuth();
@@ -13,10 +14,14 @@ const useSocket = () => {
   const connectSocket = useCallback(() => {
     if (!user || socketRef.current?.connected) return;
 
-    console.log('Connecting to socket server...');
-    
-    // Initialize socket connection with better configuration
-    const newSocket = io('http://localhost:5000', {
+    // Build socket URL from env; default to backend URL
+    const base = config.SOCKET_URL || config.API_URL || 'https://freelance-marketplace-backend-bppe.onrender.com';
+    const socketURL = base.replace(/^http/, 'ws'); // http->ws, https->wss
+
+    const token = localStorage.getItem('token') || undefined;
+
+    // Initialize socket connection
+    const newSocket = io(base, {
       withCredentials: true,
       transports: ['websocket', 'polling'],
       timeout: 20000,
@@ -25,41 +30,30 @@ const useSocket = () => {
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       auth: {
-        userId: user.id,
-        userRole: user.role
-      }
+        token, // server expects handshake.auth.token for JWT
+      },
     });
 
     socketRef.current = newSocket;
     setSocket(newSocket);
 
-    // Connection event handlers
     newSocket.on('connect', () => {
-      console.log('✅ Connected to server');
       setIsConnected(true);
       setReconnectAttempts(0);
-      
       // Join user's personal room
       newSocket.emit('join_user_room', user.id);
     });
 
     newSocket.on('disconnect', (reason) => {
-      console.log('❌ Disconnected from server:', reason);
       setIsConnected(false);
-      
-      // Auto-reconnect for certain disconnect reasons
       if (reason === 'io server disconnect') {
-        // Server initiated disconnect, try to reconnect
         setTimeout(() => connectSocket(), 2000);
       }
     });
 
     newSocket.on('connect_error', (error) => {
-      console.error('Connection error:', error);
       setIsConnected(false);
-      setReconnectAttempts(prev => prev + 1);
-      
-      // Exponential backoff for reconnection
+      setReconnectAttempts((prev) => prev + 1);
       const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
       reconnectTimeoutRef.current = setTimeout(() => {
         if (reconnectAttempts < 5) {
@@ -68,26 +62,18 @@ const useSocket = () => {
       }, delay);
     });
 
-    newSocket.on('reconnect', (attemptNumber) => {
-      console.log('🔄 Reconnected after', attemptNumber, 'attempts');
+    newSocket.on('reconnect', () => {
       setIsConnected(true);
       setReconnectAttempts(0);
     });
 
-    newSocket.on('reconnect_error', (error) => {
-      console.error('Reconnection error:', error);
-    });
-
     newSocket.on('reconnect_failed', () => {
-      console.error('❌ Failed to reconnect after maximum attempts');
       setIsConnected(false);
     });
-
   }, [user, reconnectAttempts]);
 
   useEffect(() => {
     if (!user) {
-      // Disconnect if user logs out
       if (socketRef.current) {
         socketRef.current.disconnect();
         setSocket(null);
@@ -102,7 +88,6 @@ const useSocket = () => {
 
     connectSocket();
 
-    // Cleanup on unmount
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
@@ -113,7 +98,6 @@ const useSocket = () => {
     };
   }, [user, connectSocket]);
 
-  // Helper functions
   const joinConversation = (conversationId) => {
     if (socket && isConnected) {
       socket.emit('join_conversation', conversationId);
@@ -131,7 +115,7 @@ const useSocket = () => {
       socket.emit('typing_start', {
         conversationId,
         userId: user.id,
-        userName
+        userName,
       });
     }
   };
@@ -140,7 +124,7 @@ const useSocket = () => {
     if (socket && isConnected) {
       socket.emit('typing_stop', {
         conversationId,
-        userId: user.id
+        userId: user.id,
       });
     }
   };
@@ -151,7 +135,7 @@ const useSocket = () => {
     joinConversation,
     leaveConversation,
     startTyping,
-    stopTyping
+    stopTyping,
   };
 };
 
