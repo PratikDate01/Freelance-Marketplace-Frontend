@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/static/(.*)", "dest": "build/static/$1" },
+    { "src": "/favicon.ico", "dest": "build/favicon.ico" },
+    { "src": "/manifest.json", "dest": "build/manifest.json" },
+    { "src": "/asset-manifest.json", "dest": "build/asset-manifest.json" },
+    { "src": "/logo192.png", "dest": "build/logo192.png" },
+    { "src": "/logo512.png", "dest": "build/logo512.png" },
+    { "src": "/robots.txt", "dest": "build/robots.txt" },
+    { "src": "/(.*)", "dest": "build/index.html" }
+  ],
+  "env": {
+    "REACT_APP_API_URL": "https://freelance-marketplace-backend-bppe.onrender.com",
+    "REACT_APP_PRODUCTION_API_URL": "https://freelance-marketplace-backend-bppe.onrender.com"
+  }
+}
