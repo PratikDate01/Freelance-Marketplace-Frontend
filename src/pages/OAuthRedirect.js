@@ -14,18 +14,19 @@ const OAuthRedirect = () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
-        if (!token) throw new Error('Missing token from OAuth redirect');
 
-        // Fetch current user using the token
+        // If backend uses cookie session, try fetching without token first
+        const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
         const me = await axios.get(`${config.API_URL}/api/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers,
+          withCredentials: true,
         });
         const user = me.data;
 
-        // Save to localStorage and context
-        localStorage.setItem("token", token);
+        // Save token if present
+        if (token) localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
-        setAuthData({ user, token });
+        setAuthData({ user, token: token || localStorage.getItem('token') });
 
         // Redirect based on role
         if (user.role === "freelancer") {

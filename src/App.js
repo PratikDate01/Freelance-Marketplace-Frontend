@@ -119,6 +119,8 @@ const LayoutWrapper = ({ authMode, setAuthMode }) => {
         />
 
         <Route path="/oauth-redirect" element={<OAuthRedirect />} />
+        {/* Alias route to support /oauth/redirect as per deployment instructions */}
+        <Route path="/oauth/redirect" element={<OAuthRedirect />} />
         
         {/* Test Routes - Removed for production */}
         
