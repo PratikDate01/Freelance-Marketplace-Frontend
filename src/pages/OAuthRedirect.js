@@ -15,28 +15,33 @@ const OAuthRedirect = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
 
-        // If backend uses cookie session, try fetching without token first
-        const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+        // Require token from backend redirect; if missing, send user to sign-in
+        if (!token) {
+          console.error('OAuth Redirect Error: missing token in URL');
+          navigate('/signin');
+          return;
+        }
+
+        // Fetch user with Bearer token (no cookie session)
         const me = await axios.get(`${config.API_URL}/api/auth/me`, {
-          headers,
-          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
         });
         const user = me.data;
 
-        // Save token if present
-        if (token) localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
-        setAuthData({ user, token: token || localStorage.getItem('token') });
+        // Save token and user
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        setAuthData({ user, token });
 
         // Redirect based on role
-        if (user.role === "freelancer") {
-          navigate("/freelancer/dashboard");
+        if (user.role === 'freelancer') {
+          navigate('/freelancer/dashboard');
         } else {
-          navigate("/client/profile");
+          navigate('/client/profile');
         }
       } catch (err) {
-        console.error("OAuth Redirect Error:", err);
-        navigate("/signin");
+        console.error('OAuth Redirect Error:', err);
+        navigate('/signin');
       }
     };
 
