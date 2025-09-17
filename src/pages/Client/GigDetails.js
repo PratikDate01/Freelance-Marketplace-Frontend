@@ -510,9 +510,10 @@ const GigDetails = ({ gig, goBack }) => {
                 <div className="p-6">
                   <button
                     onClick={handleOrder}
-                    className="w-full bg-green-500 text-white py-3 rounded-md font-semibold hover:bg-green-600 transition-colors duration-200 mb-3"
+                    disabled={!currentGig?._id || loading}
+                    className={`w-full py-3 rounded-md font-semibold transition-colors duration-200 mb-3 ${(!currentGig?._id || loading) ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-green-500 text-white hover:bg-green-600'}`}
                   >
-                    Continue ({formatGigPrice(currentGig.price)})
+                    {loading || !currentGig?._id ? 'Loading...' : `Continue (${formatGigPrice(currentGig.price)})`}
                   </button>
                   
                   <button className="w-full border border-gray-300 text-gray-700 py-2 rounded-md font-medium hover:bg-gray-50 transition-colors duration-200">

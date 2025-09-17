@@ -13,9 +13,24 @@ const OAuthRedirect = () => {
     const fetchOAuthUser = async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
+        // Try query param first
+        let token = urlParams.get('token');
 
-        // Require token from backend redirect; if missing, send user to sign-in
+        // If missing, try hash fragment (#token=...)
+        if (!token && window.location.hash) {
+          const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+          token = hashParams.get('token');
+        }
+
+        // If still missing, fall back to existing session token
+        if (!token) {
+          const stored = localStorage.getItem('token');
+          if (stored) {
+            token = stored;
+          }
+        }
+
+        // If no token at all, send user to sign-in
         if (!token) {
           console.error('OAuth Redirect Error: missing token in URL');
           navigate('/signin');
