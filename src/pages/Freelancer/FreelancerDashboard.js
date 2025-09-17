@@ -14,7 +14,7 @@ import {
 import { Link } from 'react-router-dom';
 import PageHeader from '../../components/PageHeader';
 import { formatPrice } from '../../utils/currency';
-import axios from 'axios';
+import axios from '../../config/axios';
 
 const FreelancerDashboard = () => {
   const { user } = useAuth();

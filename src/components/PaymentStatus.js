@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CheckCircle, Clock, AlertCircle, DollarSign, CreditCard } from 'lucide-react';
 import { useAuth } from '../hooks/AuthContext';
 import useSocket from '../hooks/useSocket';
-import axios from 'axios';
+import axios from '../config/axios';
 
 const PaymentStatus = ({ orderId, onStatusChange }) => {
   const { user } = useAuth();

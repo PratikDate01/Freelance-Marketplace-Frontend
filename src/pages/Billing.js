@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CreditCard, Download, Eye, Calendar, DollarSign, FileText, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '../hooks/AuthContext';
 import PageHeader from '../components/PageHeader';
-import axios from 'axios';
+import axios from '../config/axios';
 import { toast } from 'react-toastify';
 
 const Billing = () => {

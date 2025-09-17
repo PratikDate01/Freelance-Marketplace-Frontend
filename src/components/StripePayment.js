@@ -6,7 +6,7 @@ import {
   useStripe,
   useElements
 } from '@stripe/react-stripe-js';
-import axios from 'axios';
+import axios from '../config/axios';
 import { detectAdBlocker, showAdBlockerWarning } from '../utils/adBlockDetector';
 
 // Load Stripe with error handling

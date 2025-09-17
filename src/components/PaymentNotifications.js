@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DollarSign, CheckCircle, Clock, X } from 'lucide-react';
 import { useAuth } from '../hooks/AuthContext';
 import useSocket from '../hooks/useSocket';
-import axios from 'axios';
+import axios from '../config/axios';
 
 const PaymentNotifications = () => {
   const { user } = useAuth();
@@ -93,12 +93,12 @@ const PaymentNotifications = () => {
 
   const fetchPaymentNotifications = async () => {
     try {
-      const response = await axios.get('/api/payments/notifications', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      setNotifications(response.data);
+      const response = await axios.get('/api/payments/notifications');
+      const data = Array.isArray(response.data) ? response.data : (response.data?.notifications || []);
+      setNotifications(data);
     } catch (error) {
       console.error('Error fetching payment notifications:', error);
+      setNotifications([]);
     }
   };
 

@@ -13,7 +13,7 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
-import axios from 'axios';
+import axios from '../config/axios';
 
 const OrderDetails = ({ orderId, onClose }) => {
   const { user } = useAuth();

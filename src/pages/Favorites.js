@@ -3,7 +3,7 @@ import { Heart, Star, Clock, DollarSign, User, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/AuthContext';
 import PageHeader from '../components/PageHeader';
-import axios from 'axios';
+import axios from '../config/axios';
 import { toast } from 'react-toastify';
 
 const Favorites = () => {

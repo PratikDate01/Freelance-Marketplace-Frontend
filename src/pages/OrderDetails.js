@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { formatPrice } from '../utils/currency';
-import axios from 'axios';
+import axios from '../config/axios';
 
 const OrderDetails = () => {
   const { id } = useParams();
