@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../config/axios";
 
 const OrderDetails = () => {
   const { id } = useParams();
@@ -18,16 +18,7 @@ const OrderDetails = () => {
 
   const fetchOrder = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("No authentication token found");
-        navigate("/login");
-        return;
-      }
-
-      const response = await axios.get(`/api/orders/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(`/api/orders/${id}`);
       setOrder(response.data);
     } catch (error) {
       console.error("Error fetching order:", error);
@@ -44,19 +35,10 @@ const OrderDetails = () => {
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Authentication expired. Please login again.");
-      navigate("/login");
-      return;
-    }
-
     setSendingMessage(true);
     try {
       await axios.post(`/api/orders/${id}/messages`, {
         message: newMessage
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       setNewMessage("");
@@ -74,17 +56,8 @@ const OrderDetails = () => {
   };
 
   const acceptDelivery = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Authentication expired. Please login again.");
-      navigate("/login");
-      return;
-    }
-
     try {
-      const response = await axios.post(`/api/orders/${id}/accept`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.post(`/api/orders/${id}/accept`, {});
       alert("Delivery accepted successfully! Payment has been released to the seller.");
       fetchOrder();
     } catch (error) {
@@ -104,18 +77,9 @@ const OrderDetails = () => {
       return;
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Authentication expired. Please login again.");
-      navigate("/login");
-      return;
-    }
-
     try {
       const response = await axios.post(`/api/orders/${id}/revision`, {
         revisionNote
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       setShowRevisionModal(false);
@@ -138,19 +102,10 @@ const OrderDetails = () => {
   const cancelOrder = async () => {
     if (!window.confirm("Are you sure you want to cancel this order? This action cannot be undone.")) return;
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Authentication expired. Please login again.");
-      navigate("/login");
-      return;
-    }
-
     setIsCancelling(true);
     try {
       const response = await axios.post(`/api/orders/${id}/cancel`, {
         reason: "Cancelled by buyer"
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       // Show success message
