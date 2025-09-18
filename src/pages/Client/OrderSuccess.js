@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import PageHeader from "../../components/PageHeader";
 import { CheckCircle, Clock, User, Package } from "lucide-react";
-import axios from "axios";
+import axios from "../../config/axios";
 
 const OrderSuccess = () => {
   const navigate = useNavigate();
@@ -75,12 +75,16 @@ const OrderSuccess = () => {
             <div className="bg-green-50 px-6 py-4 border-b">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Order #{order._id.slice(-8).toUpperCase()}</h2>
-                  <p className="text-sm text-gray-600">Placed on {formatDate(order.createdAt)}</p>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Order #{order && order._id ? order._id.slice(-8).toUpperCase() : "—"}
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Placed on {order?.createdAt ? formatDate(order.createdAt) : "—"}
+                  </p>
                 </div>
                 <div className="text-right">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    {order?.status ? (order.status.charAt(0).toUpperCase() + order.status.slice(1)) : "Pending"}
                   </span>
                 </div>
               </div>
@@ -104,11 +108,11 @@ const OrderSuccess = () => {
                       <h4 className="font-semibold text-gray-900 mb-1">{order.gigTitle}</h4>
                       <div className="flex items-center gap-2 mb-2">
                         <img
-                          src={order.sellerId?.avatar || order.sellerId?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(order.sellerId?.name || 'Seller')}&background=10b981&color=fff`}
-                          alt={order.sellerId?.name}
+                          src={order?.sellerId?.avatar || order?.sellerId?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(order?.sellerId?.name || 'Seller')}&background=10b981&color=fff`}
+                          alt={order?.sellerId?.name || 'Seller'}
                           className="w-6 h-6 rounded-full"
                         />
-                        <span className="text-sm text-gray-700">{order.sellerId?.name}</span>
+                        <span className="text-sm text-gray-700">{order?.sellerId?.name || 'Seller'}</span>
                       </div>
                       <p className="text-sm text-gray-600">Package: {order.packageType}</p>
                     </div>

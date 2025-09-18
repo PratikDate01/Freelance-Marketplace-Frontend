@@ -153,8 +153,8 @@ const CheckoutForm = ({ orderId, amount, onSuccess, onError }) => {
         color: '#424770',
         '::placeholder': {
           color: '#aab7c4',
-        },
-        padding: '12px',
+        }
+        // Note: padding is not a supported property for Stripe Elements style API
       },
       invalid: {
         color: '#9e2146',
