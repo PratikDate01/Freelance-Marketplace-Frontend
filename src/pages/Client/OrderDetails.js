@@ -18,13 +18,24 @@ const OrderDetails = () => {
 
   const fetchOrder = async () => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No authentication token found");
+        navigate("/login");
+        return;
+      }
+
       const response = await axios.get(`/api/orders/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setOrder(response.data);
     } catch (error) {
       console.error("Error fetching order:", error);
-      navigate("/client/orders");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        navigate("/client/orders");
+      }
     } finally {
       setLoading(false);
     }
@@ -33,35 +44,57 @@ const OrderDetails = () => {
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Authentication expired. Please login again.");
+      navigate("/login");
+      return;
+    }
+
     setSendingMessage(true);
     try {
       await axios.post(`/api/orders/${id}/messages`, {
         message: newMessage
       }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       setNewMessage("");
       fetchOrder(); // Refresh to get new messages
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("Failed to send message");
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        alert("Failed to send message");
+      }
     } finally {
       setSendingMessage(false);
     }
   };
 
   const acceptDelivery = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Authentication expired. Please login again.");
+      navigate("/login");
+      return;
+    }
+
     try {
       const response = await axios.post(`/api/orders/${id}/accept`, {}, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       alert("Delivery accepted successfully! Payment has been released to the seller.");
       fetchOrder();
     } catch (error) {
       console.error("Error accepting delivery:", error);
-      const errorMessage = error.response?.data?.message || "Failed to accept delivery";
-      alert(errorMessage);
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        const errorMessage = error.response?.data?.message || "Failed to accept delivery";
+        alert(errorMessage);
+      }
     }
   };
 
@@ -71,21 +104,32 @@ const OrderDetails = () => {
       return;
     }
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Authentication expired. Please login again.");
+      navigate("/login");
+      return;
+    }
+
     try {
       const response = await axios.post(`/api/orders/${id}/revision`, {
         revisionNote
       }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       setShowRevisionModal(false);
       setRevisionNote("");
       alert("Revision requested successfully! The seller has been notified.");
       fetchOrder();
     } catch (error) {
       console.error("Error requesting revision:", error);
-      const errorMessage = error.response?.data?.message || "Failed to request revision";
-      alert(errorMessage);
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        const errorMessage = error.response?.data?.message || "Failed to request revision";
+        alert(errorMessage);
+      }
     }
   };
 
@@ -94,34 +138,45 @@ const OrderDetails = () => {
   const cancelOrder = async () => {
     if (!window.confirm("Are you sure you want to cancel this order? This action cannot be undone.")) return;
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Authentication expired. Please login again.");
+      navigate("/login");
+      return;
+    }
+
     setIsCancelling(true);
     try {
       const response = await axios.post(`/api/orders/${id}/cancel`, {
         reason: "Cancelled by buyer"
       }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       // Show success message
       alert("Order cancelled successfully! Refund will be processed within 3-5 business days.");
       fetchOrder();
     } catch (error) {
       console.error("Error cancelling order:", error);
-      
-      // Professional error handling
-      let errorMessage = "Failed to cancel order. Please try again.";
-      
-      if (error.response?.status === 400) {
-        errorMessage = error.response.data.message || "This order cannot be cancelled.";
-      } else if (error.response?.status === 403) {
-        errorMessage = "You don't have permission to cancel this order.";
-      } else if (error.response?.status === 404) {
-        errorMessage = "Order not found.";
-      } else if (error.response?.status >= 500) {
-        errorMessage = "Server error. Please try again later or contact support.";
+
+      if (error.response?.status === 401) {
+        navigate("/login");
+      } else {
+        // Professional error handling
+        let errorMessage = "Failed to cancel order. Please try again.";
+
+        if (error.response?.status === 400) {
+          errorMessage = error.response.data.message || "This order cannot be cancelled.";
+        } else if (error.response?.status === 403) {
+          errorMessage = "You don't have permission to cancel this order.";
+        } else if (error.response?.status === 404) {
+          errorMessage = "Order not found.";
+        } else if (error.response?.status >= 500) {
+          errorMessage = "Server error. Please try again later or contact support.";
+        }
+
+        alert(errorMessage);
       }
-      
-      alert(errorMessage);
     } finally {
       setIsCancelling(false);
     }
@@ -215,9 +270,9 @@ const OrderDetails = () => {
             </button>
             <div className="text-right">
               <h1 className="text-lg font-semibold text-gray-900">
-                Order #{order._id.slice(-8).toUpperCase()}
+                Order #{order?._id ? order._id.slice(-8).toUpperCase() : 'Loading...'}
               </h1>
-              <p className="text-sm text-gray-600">{formatDate(order.createdAt)}</p>
+              <p className="text-sm text-gray-600">{order?.createdAt ? formatDate(order.createdAt) : 'Loading...'}</p>
             </div>
           </div>
         </div>
@@ -231,14 +286,14 @@ const OrderDetails = () => {
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">Order Status</h2>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order?.status)}`}>
+                  {order?.status ? (order.status.charAt(0).toUpperCase() + order.status.slice(1)) : 'Loading...'}
                 </span>
               </div>
 
               {/* Progress Timeline */}
               <div className="space-y-4">
-                {order.statusHistory.map((status, index) => (
+                {order?.statusHistory ? order.statusHistory.map((status, index) => (
                   <div key={index} className="flex items-start gap-3">
                     <div className={`w-3 h-3 rounded-full mt-1 ${
                       index === 0 ? "bg-green-500" : "bg-gray-300"
@@ -249,7 +304,9 @@ const OrderDetails = () => {
                       <p className="text-xs text-gray-500">{formatDate(status.timestamp)}</p>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-gray-500">Loading status history...</p>
+                )}
               </div>
             </div>
 
@@ -258,22 +315,22 @@ const OrderDetails = () => {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Gig Details</h2>
               <div className="flex gap-4">
                 <img
-                  src={order.gigImage || "https://placehold.co/100"}
-                  alt={order.gigTitle}
+                  src={order?.gigImage || "https://placehold.co/100"}
+                  alt={order?.gigTitle || "Gig"}
                   className="w-24 h-24 object-cover rounded-lg"
                 />
                 <div className="flex-grow">
-                  <h3 className="font-semibold text-gray-900 mb-2">{order.gigTitle}</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">{order?.gigTitle || "Loading..."}</h3>
                   <div className="flex items-center gap-2 mb-2">
                     <img
-                      src={order.sellerId?.avatar || order.sellerId?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(order.sellerId?.name || 'Seller')}&background=10b981&color=fff`}
-                      alt={order.sellerId?.name}
+                      src={order?.sellerId?.avatar || order?.sellerId?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(order?.sellerId?.name || 'Seller')}&background=10b981&color=fff`}
+                      alt={order?.sellerId?.name || "Seller"}
                       className="w-6 h-6 rounded-full"
                     />
-                    <span className="text-sm text-gray-700">{order.sellerId?.name}</span>
+                    <span className="text-sm text-gray-700">{order?.sellerId?.name || "Seller"}</span>
                   </div>
-                  <p className="text-sm text-gray-600">Package: {order.packageType}</p>
-                  <p className="text-sm text-gray-600">Delivery: {order.deliveryTime} days</p>
+                  <p className="text-sm text-gray-600">Package: {order?.packageType || "Loading..."}</p>
+                  <p className="text-sm text-gray-600">Delivery: {order?.deliveryTime || "0"} days</p>
                 </div>
               </div>
             </div>
@@ -289,7 +346,7 @@ const OrderDetails = () => {
             )}
 
             {/* Status-specific sections */}
-            {order.status === "active" && (
+            {order?.status === "active" && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Order in Progress</h2>
                 <div className="bg-blue-50 p-4 rounded-lg">
@@ -306,7 +363,7 @@ const OrderDetails = () => {
               </div>
             )}
 
-            {order.status === "revision" && (
+            {order?.status === "revision" && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Revision in Progress</h2>
                 <div className="bg-orange-50 p-4 rounded-lg">
@@ -320,13 +377,13 @@ const OrderDetails = () => {
                     The freelancer is working on your requested revisions. You'll be notified when the revision is delivered.
                   </p>
                   <p className="text-xs text-orange-500 mt-2">
-                    Revisions used: {order.revisionCount}/{order.maxRevisions}
+                    Revisions used: {order?.revisionCount || 0}/{order?.maxRevisions || 0}
                   </p>
                 </div>
               </div>
             )}
 
-            {order.status === "completed" && (
+            {order?.status === "completed" && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Completed</h2>
                 <div className="bg-green-50 p-4 rounded-lg">
@@ -342,7 +399,7 @@ const OrderDetails = () => {
                 </div>
                 
                 {/* Show delivery details for completed orders */}
-                {order.deliveryNote && (
+                {order?.deliveryNote && (
                   <div className="mt-4 bg-gray-50 p-4 rounded-lg">
                     <p className="text-gray-800 font-medium mb-2">Final Delivery:</p>
                     <p className="text-gray-700">{order.deliveryNote}</p>
