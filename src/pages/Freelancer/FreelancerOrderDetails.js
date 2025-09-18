@@ -209,7 +209,7 @@ const FreelancerOrderDetails = () => {
               <h1 className="text-lg font-semibold text-gray-900">
                 Order #{order._id ? order._id.slice(-8).toUpperCase() : 'N/A'}
               </h1>
-              <p className="text-sm text-gray-600">{formatDate(order.createdAt)}</p>
+              <p className="text-sm text-gray-600">{order?.createdAt ? formatDate(order.createdAt) : 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -238,7 +238,7 @@ const FreelancerOrderDetails = () => {
                     <div className="flex-grow">
                       <p className="font-medium text-gray-900 capitalize">{status.status}</p>
                       <p className="text-sm text-gray-600">{status.note}</p>
-                      <p className="text-xs text-gray-500">{formatDate(status.timestamp)}</p>
+                      <p className="text-xs text-gray-500">{status?.timestamp ? formatDate(status.timestamp) : 'N/A'}</p>
                     </div>
                   </div>
                 ))}
@@ -422,16 +422,16 @@ const FreelancerOrderDetails = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Amount</span>
-                  <span className="font-medium">₹{order.amount}</span>
+                  <span className="font-medium">₹{order?.amount && !isNaN(order.amount) ? order.amount : 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Service Fee</span>
-                  <span className="font-medium">₹{order.serviceFee || 0}</span>
+                  <span className="font-medium">₹{order?.serviceFee && !isNaN(order.serviceFee) ? order.serviceFee : 0}</span>
                 </div>
                 <hr />
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Your Earnings</span>
-                  <span className="text-green-600">₹{order.amount - (order.serviceFee || 0)}</span>
+                  <span className="text-green-600">₹{((order?.amount && !isNaN(order.amount) ? order.amount : 0) - (order?.serviceFee && !isNaN(order.serviceFee) ? order.serviceFee : 0))}</span>
                 </div>
               </div>
             </div>
@@ -447,7 +447,7 @@ const FreelancerOrderDetails = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Due Date</span>
                   <span className="font-medium">
-                    {new Date(order.deliveryDate).toLocaleDateString()}
+                    {order?.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'N/A'}
                   </span>
                 </div>
                 <div className="flex justify-between">
