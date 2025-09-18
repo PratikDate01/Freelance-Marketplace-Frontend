@@ -79,7 +79,7 @@ const BrowseGigs = ({ goBack, onGigSelect }) => {
   };
 
   const filterGigs = () => {
-    let filtered = [...gigs];
+    let filtered = Array.isArray(gigs) ? [...gigs] : [];
 
     // Search filter
     if (searchQuery) {
