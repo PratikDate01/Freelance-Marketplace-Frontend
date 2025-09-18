@@ -70,9 +70,17 @@ const BrowseGigs = ({ goBack, onGigSelect }) => {
   const fetchGigs = async () => {
     try {
       const response = await axios.get("/api/gigs");
-      setGigs(response.data);
+      // Handle pagination response format
+      if (response.data && response.data.gigs) {
+        setGigs(response.data.gigs);
+      } else if (Array.isArray(response.data)) {
+        setGigs(response.data);
+      } else {
+        setGigs([]);
+      }
     } catch (error) {
       console.error("Error fetching gigs:", error);
+      setGigs([]);
     } finally {
       setLoading(false);
     }

@@ -16,9 +16,17 @@ const MyGigs = ({ goBack, onEdit }) => {
     try {
       setLoading(true);
       const res = await axios.get('/api/gigs/mine');
-      setGigs(res.data);
+      // Check if response data is an array or paginated object
+      if (res.data && Array.isArray(res.data)) {
+        setGigs(res.data);
+      } else if (res.data && res.data.gigs) {
+        setGigs(res.data.gigs);
+      } else {
+        setGigs([]);
+      }
     } catch (err) {
       console.error('Failed to load gigs:', err.response?.data || err.message);
+      setGigs([]);
     } finally {
       setLoading(false);
     }

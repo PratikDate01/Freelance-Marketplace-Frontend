@@ -49,9 +49,17 @@ const ConversationList = ({ selectedConversation, onSelectConversation }) => {
     try {
       setLoading(true);
       const response = await axios.get('/api/chat/conversations');
-      setConversations(response.data);
+      // Handle pagination response format
+      if (response.data && Array.isArray(response.data)) {
+        setConversations(response.data);
+      } else if (response.data && response.data.conversations) {
+        setConversations(response.data.conversations);
+      } else {
+        setConversations([]);
+      }
     } catch (error) {
       console.error('Error fetching conversations:', error);
+      setConversations([]);
     } finally {
       setLoading(false);
     }

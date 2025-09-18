@@ -92,9 +92,17 @@ const Home = () => {
   const fetchFeaturedGigs = async () => {
     try {
       const response = await axios.get('/api/gigs');
-      setFeaturedGigs(response.data.slice(0, 8)); // Get first 8 gigs
+      // Handle pagination response format
+      let gigs = [];
+      if (response.data && response.data.gigs) {
+        gigs = response.data.gigs;
+      } else if (Array.isArray(response.data)) {
+        gigs = response.data;
+      }
+      setFeaturedGigs(gigs.slice(0, 8)); // Get first 8 gigs
     } catch (error) {
       console.error('Error fetching gigs:', error);
+      setFeaturedGigs([]);
     } finally {
       setLoading(false);
     }
