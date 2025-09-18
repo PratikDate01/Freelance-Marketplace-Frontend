@@ -52,8 +52,8 @@ const FreelancerDashboard = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
 
-      const orders = ordersResponse.data;
-      const gigs = gigsResponse.data;
+      const orders = Array.isArray(ordersResponse.data) ? ordersResponse.data : [];
+      const gigs = Array.isArray(gigsResponse.data) ? gigsResponse.data : [];
       
       // Calculate stats
       const activeOrders = orders.filter(order => 
@@ -84,7 +84,7 @@ const FreelancerDashboard = () => {
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       console.error('Error details:', error.response?.data);
-      console.error('Error status:', error.response?.status);
+      console.error('Error status:', error.response?.status || 'Unknown');
     } finally {
       setLoading(false);
     }

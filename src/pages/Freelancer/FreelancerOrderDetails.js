@@ -223,14 +223,14 @@ const FreelancerOrderDetails = () => {
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">Order Status</h2>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order?.status)}`}>
+                  {order?.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Unknown'}
                 </span>
               </div>
 
               {/* Progress Timeline */}
               <div className="space-y-4">
-                {order.statusHistory.map((status, index) => (
+                {order?.statusHistory && order.statusHistory.map((status, index) => (
                   <div key={index} className="flex items-start gap-3">
                     <div className={`w-3 h-3 rounded-full mt-1 ${
                       index === 0 ? "bg-green-500" : "bg-gray-300"
