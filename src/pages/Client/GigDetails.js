@@ -38,6 +38,23 @@ const GigDetails = ({ gig, goBack }) => {
     }
   }, [id, gig, navigate]);
 
+  // Fetch saved status when gig is available
+  useEffect(() => {
+    const fetchSavedStatus = async () => {
+      if (currentGig?._id) {
+        try {
+          const res = await axios.get(`/api/gigs/${currentGig._id}/saved`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          setIsFavorite(res.data.isSaved);
+        } catch (error) {
+          console.error("Failed to fetch saved status", error);
+        }
+      }
+    };
+    fetchSavedStatus();
+  }, [currentGig]);
+
   // Fetch reviews when gig is available
   useEffect(() => {
     if (currentGig?._id) {
@@ -82,9 +99,27 @@ const GigDetails = ({ gig, goBack }) => {
     return formatPrice(usdPrice);
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    // Here you would typically save to backend
+  const toggleFavorite = async () => {
+    if (!currentGig || !currentGig._id) return;
+
+    try {
+      if (isFavorite) {
+        // Unsave gig
+        await axios.delete(`/api/gigs/${currentGig._id}/save`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        setIsFavorite(false);
+      } else {
+        // Save gig
+        await axios.post(`/api/gigs/${currentGig._id}/save`, {}, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error("Failed to update favorite status", error);
+      alert("Failed to update favorite status");
+    }
   };
 
   const handleShare = () => {
