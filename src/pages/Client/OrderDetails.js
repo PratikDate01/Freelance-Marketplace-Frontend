@@ -291,7 +291,7 @@ const OrderDetails = () => {
             </div>
 
             {/* Requirements */}
-            {order.requirements && (
+            {order?.requirements && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Requirements</h2>
                 <div className="bg-gray-50 p-4 rounded-lg">
@@ -360,8 +360,8 @@ const OrderDetails = () => {
                     <p className="text-gray-700">{order.deliveryNote}</p>
                   </div>
                 )}
-                
-                {order.deliveryFiles && order.deliveryFiles.length > 0 && (
+
+                {order?.deliveryFiles && order.deliveryFiles.length > 0 && (
                   <div className="mt-4">
                     <p className="font-medium text-gray-900 mb-2">Delivered Files:</p>
                     <div className="space-y-2">
@@ -386,18 +386,18 @@ const OrderDetails = () => {
             )}
 
             {/* Show delivery section for delivered orders */}
-            {order.status === "delivered" && (
+            {order?.status === "delivered" && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Delivery</h2>
-                
-                {order.deliveryNote && (
+
+                {order?.deliveryNote && (
                   <div className="bg-green-50 p-4 rounded-lg mb-4">
                     <p className="text-green-800 font-medium mb-2">Seller's Note:</p>
                     <p className="text-green-700">{order.deliveryNote}</p>
                   </div>
                 )}
-                
-                {order.deliveryFiles && order.deliveryFiles.length > 0 && (
+
+                {order?.deliveryFiles && order.deliveryFiles.length > 0 && (
                   <div className="mb-4">
                     <p className="font-medium text-gray-900 mb-2">Delivered Files:</p>
                     <div className="space-y-2">
@@ -419,7 +419,7 @@ const OrderDetails = () => {
                   </div>
                 )}
 
-                {!order.deliveryNote && !order.deliveryFiles?.length && (
+                {!order?.deliveryNote && !order?.deliveryFiles?.length && (
                   <div className="bg-yellow-50 p-4 rounded-lg mb-4">
                     <p className="text-yellow-800">The seller has marked this order as delivered but hasn't provided any delivery notes or files.</p>
                   </div>
@@ -435,16 +435,16 @@ const OrderDetails = () => {
                   </button>
                   <button
                     onClick={() => setShowRevisionModal(true)}
-                    disabled={order.revisionCount >= order.maxRevisions}
+                    disabled={order?.revisionCount >= order?.maxRevisions}
                     className={`w-full py-3 px-6 rounded-lg transition-colors ${
-                      order.revisionCount >= order.maxRevisions
+                      order?.revisionCount >= order?.maxRevisions
                         ? 'border border-gray-300 text-gray-400 cursor-not-allowed'
                         : 'border border-orange-500 text-orange-600 hover:bg-orange-50'
                     }`}
                   >
-                    {order.revisionCount >= order.maxRevisions 
-                      ? `Maximum Revisions Reached (${order.revisionCount}/${order.maxRevisions})`
-                      : `Request Revision (${order.revisionCount}/${order.maxRevisions})`
+                    {order?.revisionCount >= order?.maxRevisions
+                      ? `Maximum Revisions Reached (${order?.revisionCount}/${order?.maxRevisions})`
+                      : `Request Revision (${order?.revisionCount}/${order?.maxRevisions})`
                     }
                   </button>
                   <div className="bg-blue-50 p-4 rounded-lg">
@@ -455,7 +455,7 @@ const OrderDetails = () => {
                       <span className="text-sm font-medium">Escrow Protection Active</span>
                     </div>
                     <p className="text-sm text-blue-600">
-                      Your payment (₹{order.amount}) is held securely. Only release when you're completely satisfied with the delivery.
+                      Your payment (₹{order?.amount}) is held securely. Only release when you're completely satisfied with the delivery.
                     </p>
                   </div>
                 </div>
@@ -468,28 +468,28 @@ const OrderDetails = () => {
               
               {/* Messages List */}
               <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
-                {order.messages && order.messages.length > 0 ? (
+                {order?.messages && order.messages.length > 0 ? (
                   order.messages.map((message, index) => (
                     <div
                       key={index}
                       className={`flex gap-3 ${
-                        message.sender._id === order.buyerId._id ? "justify-end" : "justify-start"
+                        message?.sender?._id === order?.buyerId?._id ? "justify-end" : "justify-start"
                       }`}
                     >
                       <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        message.sender._id === order.buyerId._id
+                        message?.sender?._id === order?.buyerId?._id
                           ? "bg-green-500 text-white"
-                          : message.isSystem
+                          : message?.isSystem
                           ? "bg-blue-100 text-blue-800"
                           : "bg-gray-100 text-gray-800"
                       }`}>
-                        <p className="text-sm">{message.message}</p>
+                        <p className="text-sm">{message?.message}</p>
                         <p className={`text-xs mt-1 ${
-                          message.sender._id === order.buyerId._id
+                          message?.sender?._id === order?.buyerId?._id
                             ? "text-green-100"
                             : "text-gray-500"
                         }`}>
-                          {formatMessageTime(message.timestamp)}
+                          {formatMessageTime(message?.timestamp)}
                         </p>
                       </div>
                     </div>
@@ -500,7 +500,7 @@ const OrderDetails = () => {
               </div>
 
               {/* Send Message */}
-              {order.status !== "completed" && order.status !== "cancelled" && (
+              {order?.status !== "completed" && order?.status !== "cancelled" && (
                 <div className="flex gap-3">
                   <input
                     type="text"
@@ -531,16 +531,16 @@ const OrderDetails = () => {
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Service price</span>
-                  <span className="font-medium">₹{order.amount}</span>
+                  <span className="font-medium">₹{order?.amount}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Service fee</span>
-                  <span className="font-medium">₹{order.serviceFee}</span>
+                  <span className="font-medium">₹{order?.serviceFee}</span>
                 </div>
                 <hr />
                 <div className="flex justify-between font-semibold">
                   <span>Total</span>
-                  <span className="text-green-600">₹{order.totalAmount}</span>
+                  <span className="text-green-600">₹{order?.totalAmount}</span>
                 </div>
               </div>
 
@@ -548,21 +548,21 @@ const OrderDetails = () => {
               <div className="space-y-3 mb-6">
                 <div>
                   <span className="text-sm text-gray-500">Delivery Date</span>
-                  <p className="font-medium">{formatDate(order.deliveryDate)}</p>
+                  <p className="font-medium">{order?.deliveryDate ? formatDate(order.deliveryDate) : 'Loading...'}</p>
                 </div>
                 <div>
                   <span className="text-sm text-gray-500">Payment Status</span>
-                  <p className="font-medium capitalize">{order.paymentStatus}</p>
+                  <p className="font-medium capitalize">{order?.paymentStatus}</p>
                 </div>
                 <div>
                   <span className="text-sm text-gray-500">Revisions Used</span>
-                  <p className="font-medium">{order.revisionCount}/{order.maxRevisions}</p>
+                  <p className="font-medium">{order?.revisionCount}/{order?.maxRevisions}</p>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="space-y-3">
-                {order.status === "pending" && (
+                {order?.status === "pending" && (
                   <button
                     onClick={cancelOrder}
                     disabled={isCancelling}
@@ -579,7 +579,7 @@ const OrderDetails = () => {
                   </button>
                 )}
                 
-                {order.status === "completed" && !order.isReviewed && (
+                {order?.status === "completed" && !order?.isReviewed && order?.gigId?._id && (
                   <button
                     onClick={() => navigate(`/client/gig/${order.gigId._id}`)}
                     className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
@@ -588,12 +588,14 @@ const OrderDetails = () => {
                   </button>
                 )}
 
-                <button
-                  onClick={() => navigate(`/client/gig/${order.gigId._id}`)}
-                  className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  View Gig
-                </button>
+                {order?.gigId?._id && (
+                  <button
+                    onClick={() => navigate(`/client/gig/${order.gigId._id}`)}
+                    className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    View Gig
+                  </button>
+                )}
               </div>
             </div>
           </div>
