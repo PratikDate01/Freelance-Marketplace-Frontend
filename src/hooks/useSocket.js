@@ -22,6 +22,7 @@ const useSocket = () => {
 
     // Initialize socket connection
     const newSocket = io(base, {
+      path: '/ws',
       withCredentials: true,
       transports: ['websocket', 'polling'],
       timeout: 20000,
@@ -69,6 +70,25 @@ const useSocket = () => {
 
     newSocket.on('reconnect_failed', () => {
       setIsConnected(false);
+    });
+
+    // Listen for typing events
+    newSocket.on('user_typing', (data) => {
+      console.log('User typing:', data);
+    });
+
+    newSocket.on('user_stopped_typing', (data) => {
+      console.log('User stopped typing:', data);
+    });
+
+    // Listen for new messages
+    newSocket.on('new_message', (data) => {
+      console.log('New message received:', data);
+    });
+
+    // Listen for order updates
+    newSocket.on('order_status_update', (data) => {
+      console.log('Order status update:', data);
     });
   }, [user, reconnectAttempts]);
 

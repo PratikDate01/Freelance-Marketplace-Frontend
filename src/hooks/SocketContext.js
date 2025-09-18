@@ -22,6 +22,7 @@ export const SocketProvider = ({ children }) => {
     if (user) {
       // Initialize socket connection
       const newSocket = io(config.SOCKET_URL, {
+        path: '/ws',
         withCredentials: true,
         transports: ['websocket', 'polling'],
         reconnection: true,
@@ -48,6 +49,27 @@ export const SocketProvider = ({ children }) => {
       newSocket.on('connect_error', (error) => {
         console.error('Socket connection error:', error);
         setConnected(false);
+      });
+
+      // Listen for typing events
+      newSocket.on('user_typing', (data) => {
+        // Handle typing indicator
+        console.log('User typing:', data);
+      });
+
+      newSocket.on('user_stopped_typing', (data) => {
+        // Handle stop typing
+        console.log('User stopped typing:', data);
+      });
+
+      // Listen for new messages
+      newSocket.on('new_message', (data) => {
+        console.log('New message received:', data);
+      });
+
+      // Listen for order updates
+      newSocket.on('order_status_update', (data) => {
+        console.log('Order status update:', data);
       });
 
       setSocket(newSocket);
