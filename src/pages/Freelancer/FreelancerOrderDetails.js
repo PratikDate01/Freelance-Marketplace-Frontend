@@ -30,6 +30,7 @@ const FreelancerOrderDetails = () => {
       const response = await axios.get(`/api/orders/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
+      console.log("Fetched order data:", response.data); // Debug log, remove in production
       setOrder(response.data);
     } catch (error) {
       console.error("Error fetching order:", error);
@@ -230,18 +231,20 @@ const FreelancerOrderDetails = () => {
 
               {/* Progress Timeline */}
               <div className="space-y-4">
-                {order?.statusHistory && order.statusHistory.map((status, index) => (
+                {Array.isArray(order?.statusHistory) && order.statusHistory.length > 0 ? order.statusHistory.map((status, index) => (
                   <div key={index} className="flex items-start gap-3">
                     <div className={`w-3 h-3 rounded-full mt-1 ${
                       index === 0 ? "bg-green-500" : "bg-gray-300"
                     }`}></div>
                     <div className="flex-grow">
-                      <p className="font-medium text-gray-900 capitalize">{status.status}</p>
-                      <p className="text-sm text-gray-600">{status.note}</p>
+                      <p className="font-medium text-gray-900 capitalize">{status.status || 'Unknown'}</p>
+                      <p className="text-sm text-gray-600">{status.note || ''}</p>
                       <p className="text-xs text-gray-500">{status?.timestamp ? formatDate(status.timestamp) : 'N/A'}</p>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-gray-500">No status history available</p>
+                )}
               </div>
             </div>
 
@@ -257,11 +260,11 @@ const FreelancerOrderDetails = () => {
                 <div className="flex-grow">
                   <h3 className="font-semibold text-gray-900 mb-2">{order.gigTitle}</h3>
                   <div className="flex items-center gap-2 mb-2">
-                    <img
-                      src={order.buyerId?.avatar || order.buyerId?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(order.buyerId?.name || 'Client')}&background=10b981&color=fff`}
-                      alt={order.buyerId?.name}
-                      className="w-6 h-6 rounded-full"
-                    />
+                <img
+                  src={order.buyerId?.avatar || order.buyerId?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(order.buyerId?.name || 'Client')}&background=10b981&color=fff`}
+                  alt={order.buyerId?.name || 'Client'}
+                  className="w-6 h-6 rounded-full"
+                />
                     <span className="text-sm text-gray-700">{order.buyerId?.name}</span>
                   </div>
                   <p className="text-sm text-gray-600">Package: {order.packageType}</p>
@@ -356,30 +359,30 @@ const FreelancerOrderDetails = () => {
               
               {/* Messages List */}
               <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
-                {order.messages && order.messages.length > 0 ? (
+                {Array.isArray(order.messages) && order.messages.length > 0 ? (
                   order.messages.map((message, index) => (
                     <div
                       key={index}
                       className={`flex gap-3 ${
-                        message.sender._id === order.sellerId._id ? "justify-end" : "justify-start"
+                        message.sender?._id === order.sellerId?._id ? "justify-end" : "justify-start"
                       }`}
                     >
                       <div
                         className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          message.sender._id === order.sellerId._id
+                          message.sender?._id === order.sellerId?._id
                             ? "bg-green-500 text-white"
                             : "bg-gray-100 text-gray-900"
                         }`}
                       >
-                        <p className="text-sm">{message.message}</p>
+                        <p className="text-sm">{message.message || ''}</p>
                         <p
                           className={`text-xs mt-1 ${
-                            message.sender._id === order.sellerId._id
+                            message.sender?._id === order.sellerId?._id
                               ? "text-green-100"
                               : "text-gray-500"
                           }`}
                         >
-                          {formatMessageTime(message.timestamp)}
+                          {message.timestamp ? formatMessageTime(message.timestamp) : ''}
                         </p>
                       </div>
                     </div>
