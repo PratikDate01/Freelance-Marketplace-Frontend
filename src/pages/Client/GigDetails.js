@@ -4,7 +4,7 @@ import { Heart, Share2, Flag, Shield, Award, Clock, RefreshCw, CheckCircle, Star
 import PageHeader from "../../components/PageHeader";
 import BackButton from "../../components/BackButton";
 import { formatPrice, convertINRToUSD } from "../../utils/currency";
-import axios from "axios";
+import axios from "../../config/axios";
 
 const GigDetails = ({ gig, goBack }) => {
   const navigate = useNavigate();

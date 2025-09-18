@@ -6,7 +6,7 @@ import PageHeader from "../../components/PageHeader";
 import BackButton from "../../components/BackButton";
 import StripePayment from "../../components/StripePayment";
 import { formatPrice, convertINRToUSD, calculateServiceFee, calculateTotal } from "../../utils/currency";
-import axios from "axios";
+import axios from "../../config/axios";
 
 const PlaceOrder = () => {
   const { id } = useParams();
