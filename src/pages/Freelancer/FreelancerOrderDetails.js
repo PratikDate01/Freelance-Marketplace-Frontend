@@ -207,7 +207,7 @@ const FreelancerOrderDetails = () => {
             </button>
             <div className="text-right">
               <h1 className="text-lg font-semibold text-gray-900">
-                Order #{order._id.slice(-8).toUpperCase()}
+                Order #{order._id ? order._id.slice(-8).toUpperCase() : 'N/A'}
               </h1>
               <p className="text-sm text-gray-600">{formatDate(order.createdAt)}</p>
             </div>
