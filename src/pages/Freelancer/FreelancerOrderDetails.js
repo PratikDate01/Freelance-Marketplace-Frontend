@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../config/axios";
 
 const FreelancerOrderDetails = () => {
   const { id } = useParams();
@@ -27,9 +27,7 @@ const FreelancerOrderDetails = () => {
 
   const fetchOrder = async () => {
     try {
-      const response = await axios.get(`/api/orders/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
+      const response = await axios.get(`/api/orders/${id}`);
       console.log("Fetched order data:", response.data); // Debug log, remove in production
       setOrder(response.data);
     } catch (error) {
@@ -47,10 +45,8 @@ const FreelancerOrderDetails = () => {
     try {
       await axios.post(`/api/orders/${id}/messages`, {
         message: newMessage
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
-      
+
       setNewMessage("");
       fetchOrder(); // Refresh to get new messages
     } catch (error) {
@@ -72,10 +68,8 @@ const FreelancerOrderDetails = () => {
       await axios.post(`/api/orders/${id}/deliver`, {
         deliveryNote,
         deliveryFiles
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
-      
+
       setShowDeliveryModal(false);
       setDeliveryNote("");
       setDeliveryFiles([]);
@@ -102,10 +96,8 @@ const FreelancerOrderDetails = () => {
       await axios.post(`/api/orders/${id}/deliver`, {
         deliveryNote: revisionResponse,
         deliveryFiles
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
-      
+
       setShowRevisionModal(false);
       setRevisionResponse("");
       setDeliveryFiles([]);

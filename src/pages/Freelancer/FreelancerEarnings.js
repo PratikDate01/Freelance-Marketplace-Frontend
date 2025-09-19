@@ -482,7 +482,7 @@ const FreelancerEarnings = () => {
                         
                         <div className="text-right">
                           <p className="text-lg font-semibold text-green-600">
-                            +{formatPrice((order.amount || 0) * 0.95)} {/* 95% after platform fee */}
+                            +{formatPrice((order.amount || 0) - (order.serviceFee || 0))} {/* Amount minus service fee */}
                           </p>
                           <p className="text-sm text-gray-500">
                             Total: {formatPrice(order.totalAmount || order.amount || 0)}
