@@ -170,7 +170,7 @@ const BrowseGigs = ({ goBack, onGigSelect }) => {
   };
 
   const formatGigPrice = (price) => {
-    return formatPrice(price);
+    return formatPrice(price, { currency: 'INR', locale: 'en-IN' });
   };
 
   if (loading) {

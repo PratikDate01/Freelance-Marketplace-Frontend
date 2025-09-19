@@ -95,7 +95,7 @@ const GigDetails = ({ gig, goBack }) => {
   };
 
   const formatGigPrice = (price) => {
-    return formatPrice(price);
+    return formatPrice(price, { currency: 'INR', locale: 'en-IN' });
   };
 
   const toggleFavorite = async () => {

@@ -46,7 +46,7 @@ const PlaceOrder = () => {
     const serviceFee = Math.round(inrServiceFee * rate);
     const total = Math.round(inrTotal * rate);
 
-    return { amount, serviceFee, total, usdAmount: amount, usdServiceFee: serviceFee, usdTotal: total };
+    return { amount, serviceFee, total, usdAmount: amount, usdServiceFee: serviceFee, usdTotal: total, inrAmount, inrServiceFee, inrTotal };
   };
 
   const handleCreateOrder = async () => {
@@ -159,19 +159,19 @@ const PlaceOrder = () => {
                 </div>
 
                 <div className="space-y-3 mb-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Service price</span>
-                    <span className="font-medium">{formatPrice(pricing.usdAmount)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Service fee (5%)</span>
-                    <span className="font-medium">{formatPrice(pricing.usdServiceFee)}</span>
-                  </div>
-                  <hr />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
-                    <span className="text-green-600">{formatPrice(pricing.usdTotal)}</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Service price</span>
+                  <span className="font-medium">{formatPrice(pricing.inrAmount, { currency: 'INR', locale: 'en-IN' })}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Service fee (5%)</span>
+                  <span className="font-medium">{formatPrice(pricing.inrServiceFee, { currency: 'INR', locale: 'en-IN' })}</span>
+                </div>
+                <hr />
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total</span>
+                  <span className="text-green-600">{formatPrice(pricing.inrTotal, { currency: 'INR', locale: 'en-IN' })}</span>
+                </div>
                 </div>
 
                 <div className="bg-green-50 p-3 rounded-lg">
@@ -243,7 +243,7 @@ const PlaceOrder = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-green-600">{formatPrice(Math.round((gig.price || 0) * 0.012))}</p>
+                  <p className="text-lg font-bold text-green-600">{formatPrice(pricing.inrAmount, { currency: 'INR', locale: 'en-IN' })}</p>
                   <p className="text-sm text-gray-500">{gig.deliveryTime} days delivery</p>
                 </div>
               </div>
@@ -259,7 +259,7 @@ const PlaceOrder = () => {
                         <p className="text-sm text-gray-600">Standard delivery with 1 revision</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-green-600">{formatPrice(Math.round((gig.price || 0) * 0.012))}</p>
+                        <p className="text-lg font-bold text-green-600">{formatPrice(pricing.inrAmount, { currency: 'INR', locale: 'en-IN' })}</p>
                         <p className="text-sm text-gray-500">{gig.deliveryTime} days</p>
                       </div>
                     </div>
@@ -295,16 +295,16 @@ const PlaceOrder = () => {
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Service price</span>
-                  <span className="font-medium">{formatPrice(pricing.usdAmount)}</span>
+                  <span className="font-medium">{formatPrice(pricing.inrAmount, { currency: 'INR', locale: 'en-IN' })}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Service fee (5%)</span>
-                  <span className="font-medium">{formatPrice(pricing.usdServiceFee)}</span>
+                  <span className="font-medium">{formatPrice(pricing.inrServiceFee, { currency: 'INR', locale: 'en-IN' })}</span>
                 </div>
                 <hr />
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span className="text-green-600">{formatPrice(pricing.usdTotal)}</span>
+                  <span className="text-green-600">{formatPrice(pricing.inrTotal, { currency: 'INR', locale: 'en-IN' })}</span>
                 </div>
               </div>
 
@@ -349,7 +349,7 @@ const PlaceOrder = () => {
                     Processing...
                   </div>
                 ) : (
-                  `Continue (${formatPrice(pricing.usdTotal)})`
+                  `Continue (${formatPrice(pricing.inrTotal, { currency: 'INR', locale: 'en-IN' })})`
                 )}
               </button>
 

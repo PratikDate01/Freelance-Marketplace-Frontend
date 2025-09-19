@@ -544,7 +544,7 @@ const OrderDetails = () => {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Service fee</span>
-                  <span className="font-medium">{formatPrice(order?.serviceFee)}</span>
+                  <span className="font-medium">{formatPrice(order?.serviceFee, { currency: 'INR', locale: 'en-IN' })}</span>
                 </div>
                 <hr />
                 <div className="flex justify-between font-semibold">

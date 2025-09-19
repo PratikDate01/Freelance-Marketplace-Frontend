@@ -1,32 +1,33 @@
 /**
  * Currency utility functions for the freelancer marketplace
- * Handles USD formatting and conversion
+ * Handles INR formatting and conversion
  */
 
 export const formatPrice = (price, options = {}) => {
   const {
     showCents = false,
     showSymbol = true,
-    locale = 'en-US'
+    locale = 'en-IN',
+    currency = 'INR'
   } = options;
 
   if (typeof price !== 'number' || isNaN(price)) {
-    return showSymbol ? '$0' : '0';
+    return showSymbol ? (currency === 'INR' ? '₹0' : '$0') : '0';
   }
 
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'USD',
+    currency: currency,
     minimumFractionDigits: showCents ? 2 : 0,
     maximumFractionDigits: showCents ? 2 : 0,
   }).format(price);
 };
 
-export const formatPriceRange = (minPrice, maxPrice) => {
+export const formatPriceRange = (minPrice, maxPrice, options = {}) => {
   if (minPrice === maxPrice) {
-    return formatPrice(minPrice);
+    return formatPrice(minPrice, options);
   }
-  return `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+  return `${formatPrice(minPrice, options)} - ${formatPrice(maxPrice, options)}`;
 };
 
 export const calculateServiceFee = (amount, feePercentage = 5) => {
@@ -38,17 +39,17 @@ export const calculateTotal = (amount, serviceFee = null) => {
   return amount + fee;
 };
 
-export const formatCompactPrice = (price) => {
+export const formatCompactPrice = (price, options = {}) => {
   if (price >= 1000000) {
-    return `$${(price / 1000000).toFixed(1)}M`;
+    return `${options.currency === 'INR' ? '₹' : '$'}${(price / 1000000).toFixed(1)}M`;
   }
   if (price >= 1000) {
-    return `$${(price / 1000).toFixed(1)}K`;
+    return `${options.currency === 'INR' ? '₹' : '$'}${(price / 1000).toFixed(1)}K`;
   }
-  return formatPrice(price);
+  return formatPrice(price, options);
 };
 
-// Note: All prices are assumed to be in USD
+// Note: All prices are assumed to be in INR by default
 
 export default {
   formatPrice,
