@@ -169,9 +169,8 @@ const BrowseGigs = ({ goBack, onGigSelect }) => {
     });
   };
 
-  const formatGigPrice = (inrPrice) => {
-    const usdPrice = convertINRToUSD(inrPrice);
-    return formatPrice(usdPrice);
+  const formatGigPrice = (price) => {
+    return formatPrice(price);
   };
 
   if (loading) {
