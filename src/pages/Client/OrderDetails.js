@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../config/axios";
+import { formatPrice } from "../../utils/currency";
 
 const OrderDetails = () => {
   const { id } = useParams();
@@ -14,6 +15,14 @@ const OrderDetails = () => {
 
   useEffect(() => {
     fetchOrder();
+  }, [id]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchOrder();
+    }, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(interval);
   }, [id]);
 
   const fetchOrder = async () => {
@@ -531,16 +540,16 @@ const OrderDetails = () => {
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Service price</span>
-                  <span className="font-medium">₹{order?.amount}</span>
+                  <span className="font-medium">{formatPrice(order?.amount)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Service fee</span>
-                  <span className="font-medium">₹{order?.serviceFee}</span>
+                  <span className="font-medium">{formatPrice(order?.serviceFee)}</span>
                 </div>
                 <hr />
                 <div className="flex justify-between font-semibold">
                   <span>Total</span>
-                  <span className="text-green-600">₹{order?.totalAmount}</span>
+                  <span className="text-green-600">{formatPrice(order?.totalAmount)}</span>
                 </div>
               </div>
 
