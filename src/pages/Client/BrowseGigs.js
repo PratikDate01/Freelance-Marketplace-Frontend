@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search, Filter, Star, Clock, MapPin, Grid, List, ChevronDown, Heart, Shield, Award, TrendingUp } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import BackButton from "../../components/BackButton";
-import { formatPrice, convertINRToUSD } from "../../utils/currency";
+import { formatPrice } from "../../utils/currency";
 import axios from "../../config/axios";
 
 const BrowseGigs = ({ goBack, onGigSelect }) => {
@@ -103,15 +103,14 @@ const BrowseGigs = ({ goBack, onGigSelect }) => {
       filtered = filtered.filter(gig => gig.category === selectedCategory);
     }
 
-    // Price range filter (treat gig.price as INR and convert to USD for comparison)
-    const rate = 0.012;
+    // Price range filter
     if (priceRange.min) {
       const minUsd = parseFloat(priceRange.min);
-      filtered = filtered.filter(gig => Math.round((gig.price || 0) * rate) >= minUsd);
+      filtered = filtered.filter(gig => (gig.price || 0) >= minUsd);
     }
     if (priceRange.max) {
       const maxUsd = parseFloat(priceRange.max);
-      filtered = filtered.filter(gig => Math.round((gig.price || 0) * rate) <= maxUsd);
+      filtered = filtered.filter(gig => (gig.price || 0) <= maxUsd);
     }
 
     // Delivery time filter

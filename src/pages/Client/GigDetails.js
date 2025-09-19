@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Heart, Share2, Flag, Shield, Award, Clock, RefreshCw, CheckCircle, Star, MessageCircle } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
 import BackButton from "../../components/BackButton";
-import { formatPrice, convertINRToUSD } from "../../utils/currency";
+import { formatPrice } from "../../utils/currency";
 import axios from "../../config/axios";
 
 const GigDetails = ({ gig, goBack }) => {
@@ -94,9 +94,8 @@ const GigDetails = ({ gig, goBack }) => {
     navigate(`/client/place-order/${currentGig._id}`);
   };
 
-  const formatGigPrice = (inrPrice) => {
-    const usdPrice = convertINRToUSD(inrPrice);
-    return formatPrice(usdPrice);
+  const formatGigPrice = (price) => {
+    return formatPrice(price);
   };
 
   const toggleFavorite = async () => {

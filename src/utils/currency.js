@@ -48,16 +48,12 @@ export const formatCompactPrice = (price) => {
   return formatPrice(price);
 };
 
-// Convert INR to USD (approximate conversion rate)
-export const convertINRToUSD = (inrAmount, exchangeRate = 0.012) => {
-  return Math.round(inrAmount * exchangeRate);
-};
+// Note: All prices are assumed to be in USD
 
 export default {
   formatPrice,
   formatPriceRange,
   calculateServiceFee,
   calculateTotal,
-  formatCompactPrice,
-  convertINRToUSD
+  formatCompactPrice
 };
