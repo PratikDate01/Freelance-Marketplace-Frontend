@@ -6,14 +6,14 @@ import GigDetails from "./GigDetails";
 import ProtectedRoute from "../../components/ProtectedRoute";
 import PageHeader from "../../components/PageHeader";
 import { useAuth } from "../../hooks/AuthContext";
-import { 
-  Search, 
-  Package, 
-  BarChart3, 
-  LogOut, 
-  User, 
-  ShoppingCart, 
-  Clock, 
+import {
+  Search,
+  Package,
+  BarChart3,
+  LogOut,
+  User,
+  ShoppingCart,
+  Clock,
   Settings,
   MessageCircle,
   Heart,
@@ -29,7 +29,7 @@ import {
   Mail,
   Globe
 } from "lucide-react";
-import axios from "axios";
+import axios from "../../config/axios";
 import { toast } from "react-toastify";
 import MessagesPage from "../Messages";
 
@@ -81,16 +81,9 @@ const ClientProfile = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Fetch orders statistics (includes recent orders)
-      const ordersResponse = await axios.get('/api/orders/buyer/stats', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
 
-      // Fetch recent activity
-      const activityResponse = await axios.get('/api/users/activity', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      // Fetch orders statistics (includes recent orders)
+      const ordersResponse = await axios.get('/api/orders/buyer/stats');
 
       // Update stats
       if (ordersResponse.data) {
@@ -101,16 +94,11 @@ const ClientProfile = () => {
           totalSpent: ordersResponse.data.totalSpent || 0,
           savedGigs: ordersResponse.data.savedGigs || 0
         });
-        
+
         // Update recent orders from the same response
         if (ordersResponse.data.recentOrders) {
           setRecentOrders(ordersResponse.data.recentOrders.slice(0, 3));
         }
-      }
-
-      // Update recent activity
-      if (activityResponse.data && activityResponse.data.activities) {
-        setRecentActivity(activityResponse.data.activities.slice(0, 5));
       }
 
     } catch (error) {
@@ -123,6 +111,7 @@ const ClientProfile = () => {
         totalSpent: 0,
         savedGigs: 0
       });
+      setRecentOrders([]);
     } finally {
       setLoading(false);
     }
@@ -163,13 +152,11 @@ const ClientProfile = () => {
     setLoading(true);
 
     try {
-      const response = await axios.put('/api/users/profile', profileData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await axios.put('/api/users/profile', profileData);
 
       // Update local state and auth context
       setProfileData(prev => ({ ...prev, ...response.data.user }));
-      
+
       toast.success('Profile updated successfully!');
       setPage("profile");
     } catch (error) {

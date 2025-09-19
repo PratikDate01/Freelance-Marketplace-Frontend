@@ -36,33 +36,17 @@ const FreelancerDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Fetch earnings
-      const earningsResponse = await axios.get('/api/payments/seller/earnings', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      
-      // Fetch orders
-      const ordersResponse = await axios.get('/api/orders/seller', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      
-      // Fetch gig stats
-      const gigsResponse = await axios.get('/api/gigs/mine', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
 
-      const orders = Array.isArray(ordersResponse.data) ? ordersResponse.data : [];
+      // Fetch seller stats (includes order stats and recent orders)
+      const statsResponse = await axios.get('/api/orders/seller/stats');
+
+      // Fetch earnings
+      const earningsResponse = await axios.get('/api/payments/seller/earnings');
+
+      // Fetch gig stats
+      const gigsResponse = await axios.get('/api/gigs/mine');
+
       const gigs = Array.isArray(gigsResponse.data) ? gigsResponse.data : [];
-      
-      // Calculate stats
-      const activeOrders = orders.filter(order => 
-        ['active', 'delivered'].includes(order.status)
-      ).length;
-      
-      const completedOrders = orders.filter(order => 
-        order.status === 'completed'
-      ).length;
 
       // Calculate average rating from all gigs
       const totalRatings = gigs.reduce((sum, gig) => sum + (gig.averageRating || 0), 0);
@@ -70,21 +54,35 @@ const FreelancerDashboard = () => {
       const averageRating = gigs.length > 0 ? totalRatings / gigs.length : 0;
 
       setStats({
-        totalEarnings: parseFloat(earningsResponse.data.totalEarnings || 0),
-        monthlyEarnings: parseFloat(earningsResponse.data.monthlyEarnings || 0),
-        activeOrders,
-        completedOrders,
+        totalEarnings: parseFloat(earningsResponse.data?.totalEarnings || 0),
+        monthlyEarnings: parseFloat(earningsResponse.data?.monthlyEarnings || 0),
+        activeOrders: statsResponse.data?.activeOrders || 0,
+        completedOrders: statsResponse.data?.completedOrders || 0,
+        totalOrders: statsResponse.data?.totalOrders || 0,
         averageRating: averageRating.toFixed(1),
         totalReviews
       });
 
-      // Set recent orders (last 5)
-      setRecentOrders(orders.slice(0, 5));
-      
+      // Set recent orders from stats response
+      if (statsResponse.data?.recentOrders) {
+        setRecentOrders(statsResponse.data.recentOrders.slice(0, 5));
+      }
+
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       console.error('Error details:', error.response?.data);
       console.error('Error status:', error.response?.status || 'Unknown');
+      // Set default values on error
+      setStats({
+        totalEarnings: 0,
+        monthlyEarnings: 0,
+        activeOrders: 0,
+        completedOrders: 0,
+        totalOrders: 0,
+        averageRating: '0.0',
+        totalReviews: 0
+      });
+      setRecentOrders([]);
     } finally {
       setLoading(false);
     }

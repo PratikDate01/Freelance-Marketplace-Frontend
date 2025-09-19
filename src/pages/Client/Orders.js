@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package, Clock, CheckCircle, AlertCircle, RefreshCw, Star, MessageCircle } from "lucide-react";
+import { toast } from "react-toastify";
 import PageHeader from "../../components/PageHeader";
 import BackButton from "../../components/BackButton";
 import { formatPrice, convertINRToUSD } from "../../utils/currency";
@@ -237,10 +238,41 @@ const Orders = ({ goBack }) => {
                     
                     {order.status === "delivered" && (
                       <>
-                        <button className="flex-1 border border-green-500 text-green-600 py-2 px-4 rounded-lg hover:bg-green-50 transition-colors text-sm font-medium">
+                        <button
+                          onClick={async () => {
+                            try {
+                              await axios.post(`/api/orders/${order._id}/accept`);
+                              // Refresh orders after accepting
+                              fetchOrders(pagination.currentPage);
+                              toast.success('Order completed successfully!');
+                            } catch (error) {
+                              console.error('Error accepting delivery:', error);
+                              toast.error(error.response?.data?.message || 'Failed to accept delivery');
+                            }
+                          }}
+                          className="flex-1 border border-green-500 text-green-600 py-2 px-4 rounded-lg hover:bg-green-50 transition-colors text-sm font-medium"
+                        >
                           Accept Delivery
                         </button>
-                        <button className="flex-1 border border-orange-500 text-orange-600 py-2 px-4 rounded-lg hover:bg-orange-50 transition-colors text-sm font-medium">
+                        <button
+                          onClick={async () => {
+                            const revisionNote = prompt('Please describe what revisions you need:');
+                            if (!revisionNote || !revisionNote.trim()) return;
+
+                            try {
+                              await axios.post(`/api/orders/${order._id}/revision`, {
+                                revisionNote: revisionNote.trim()
+                              });
+                              // Refresh orders after requesting revision
+                              fetchOrders(pagination.currentPage);
+                              toast.success('Revision requested successfully!');
+                            } catch (error) {
+                              console.error('Error requesting revision:', error);
+                              toast.error(error.response?.data?.message || 'Failed to request revision');
+                            }
+                          }}
+                          className="flex-1 border border-orange-500 text-orange-600 py-2 px-4 rounded-lg hover:bg-orange-50 transition-colors text-sm font-medium"
+                        >
                           Request Revision
                         </button>
                       </>
