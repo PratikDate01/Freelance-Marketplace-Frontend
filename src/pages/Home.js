@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Star, ChevronRight, Play, Users, Award, Clock, CheckCircle, Menu, X, ArrowRight } from 'lucide-react';
 import axios from '../config/axios';
 import Footer from '../components/Footer';
+import { formatPrice } from '../utils/currency';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -129,18 +130,8 @@ const Home = () => {
     navigate(`/client/browse-gigs?search=${encodeURIComponent(term)}`);
   };
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
-  const formatGigPrice = (inrPrice) => {
-    const usdPrice = Math.round(inrPrice * 0.012); // Convert INR to USD
-    return formatPrice(usdPrice);
+  const formatGigPrice = (price) => {
+    return formatPrice(price);
   };
 
   return (

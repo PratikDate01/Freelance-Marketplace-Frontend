@@ -1,18 +1,18 @@
 /**
  * Currency utility functions for the freelancer marketplace
- * Handles INR formatting and conversion
+ * Handles USD formatting and conversion
  */
 
 export const formatPrice = (price, options = {}) => {
   const {
     showCents = false,
     showSymbol = true,
-    locale = 'en-IN',
-    currency = 'INR'
+    locale = 'en-US',
+    currency = 'USD'
   } = options;
 
   if (typeof price !== 'number' || isNaN(price)) {
-    return showSymbol ? (currency === 'INR' ? '₹0' : '$0') : '0';
+    return showSymbol ? '$0' : '0';
   }
 
   return new Intl.NumberFormat(locale, {
@@ -41,15 +41,15 @@ export const calculateTotal = (amount, serviceFee = null) => {
 
 export const formatCompactPrice = (price, options = {}) => {
   if (price >= 1000000) {
-    return `${options.currency === 'INR' ? '₹' : '$'}${(price / 1000000).toFixed(1)}M`;
+    return `$${(price / 1000000).toFixed(1)}M`;
   }
   if (price >= 1000) {
-    return `${options.currency === 'INR' ? '₹' : '$'}${(price / 1000).toFixed(1)}K`;
+    return `$${(price / 1000).toFixed(1)}K`;
   }
   return formatPrice(price, options);
 };
 
-// Note: All prices are assumed to be in INR by default
+// Note: All prices are assumed to be in USD by default
 
 export default {
   formatPrice,

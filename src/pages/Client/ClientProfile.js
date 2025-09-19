@@ -32,6 +32,7 @@ import {
 import axios from "../../config/axios";
 import { toast } from "react-toastify";
 import MessagesPage from "../Messages";
+import { formatPrice } from "../../utils/currency";
 
 const ClientProfile = () => {
   const [page, setPage] = useState("profile");
